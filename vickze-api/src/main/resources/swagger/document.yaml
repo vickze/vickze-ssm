@@ -1,0 +1,224 @@
+swagger: '2.0'
+info:
+  description: RESTful API Demo
+  version: 1.0.0
+  title: Restful API
+
+schemes:
+  - http
+
+#认证
+securityDefinitions:
+  api_key:
+    type: "apiKey"
+    name: "token"
+    in: "header"
+
+basePath: "/api"
+
+
+#定义接口数据
+paths:
+  /user/register:
+    post:
+      tags:
+        - 用户相关接口
+      summary: 注册
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          description: 用户注册信息
+          in: body
+          type: string
+          required: true
+          schema:
+            $ref: '#/definitions/RegisterUserDO'
+      responses:
+        200:
+          schema:
+            $ref: '#/definitions/TokenDO'
+        default:
+          schema:
+            $ref: '#/definitions/ResultDO'
+  /user/login:
+    post:
+      tags:
+        - 用户相关接口
+      summary: 登录
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          description: 用户登录信息
+          in: body
+          type: string
+          required: true
+          schema:
+            $ref: '#/definitions/LoginUserDO'
+      responses:
+        200:
+          schema:
+            $ref: '#/definitions/TokenDO'
+        default:
+          schema:
+            $ref: '#/definitions/ResultDO'
+  /user/logout:
+    post:
+      tags:
+        - 用户相关接口
+      summary: 登出
+      produces:
+        - application/json
+      responses:
+        default:
+          schema:
+            $ref: '#/definitions/ResultDO'
+  /user/get:
+    get:
+      tags:
+        - 用户相关接口
+      summary: 获取信息
+      produces:
+        - application/json
+      responses:
+        200:
+          schema:
+            $ref: '#/definitions/UserDO'
+        default:
+          schema:
+            $ref: '#/definitions/ResultDO'
+  /user/update_password:
+    post:
+      tags:
+        - 用户相关接口
+      summary: 修改密码
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          description: 密码信息
+          in: body
+          type: string
+          required: true
+          schema:
+            $ref: '#/definitions/UpdatePasswordDO'
+      responses:
+        default:
+          schema:
+            $ref: '#/definitions/ResultDO'
+  /user/refresh_token:
+    post:
+      tags:
+        - 用户相关接口
+      summary: 重新获取Token
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          description: refreshToken信息
+          in: body
+          type: string
+          required: true
+          schema:
+            $ref: '#/definitions/RefreshTokenDO'
+      responses:
+        200:
+          schema:
+            $ref: '#/definitions/TokenDO'
+        default:
+          schema:
+            $ref: '#/definitions/ResultDO'
+
+#定义数据模型
+definitions:
+  ResultDO:
+      type: object
+      properties:
+        code:
+          description: 状态码 0：成功  非0：失败
+          type: integer
+          format: int32
+        msg:
+          description: 失败原因
+          type: string
+        success:
+          description: true：成功  false：失败
+          type: boolean
+  RegisterUserDO:
+      type: object
+      properties:
+        mobile:
+          description: 用户手机号
+          type: string
+        nickname:
+          description: 用户昵称
+          type: string
+        password:
+          description: 用户密码
+          type: string
+  LoginUserDO:
+      type: object
+      properties:
+        mobile:
+          description: 用户手机号
+          type: string
+        password:
+          description: 用户密码
+          type: string
+  TokenDO:
+      type: object
+      properties:
+        token:
+          description: 用户唯一标识
+          type: string
+        tokenExpire:
+          description: token过期时间
+          type: integer
+          format: int64
+        refreshToken:
+          description: 用户重新获取token凭据
+          type: string
+        refreshTokenExpire:
+          description: refreshToken过期时间
+          type: integer
+          format: int64
+  UserDO:
+      type: object
+      properties:
+        id:
+          description: 用户ID
+          type: integer
+          format: int64
+        nickname:
+          description: 用户昵称
+          type: string
+        password:
+          description: 用户密码
+          type: string
+        mobile:
+          description: 用户手机号
+          type: string
+        createTime:
+          description: 创建时间
+          type: string
+        lastModifiedTime:
+          description: 最后修改时间
+          type: string
+  UpdatePasswordDO:
+      type: object
+      properties:
+        oldPassword:
+          description: 旧密码
+          type: string
+        newPassword:
+          description: 新密码
+          type: string
+  RefreshTokenDO:
+      type: object
+      properties:
+        refreshToken:
+          description: 旧密码
+          type: string
+
+

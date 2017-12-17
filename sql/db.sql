@@ -1,0 +1,2 @@
+--创建数据库
+CREATE DATABASE vickze_ssm DEFAULT CHARACTER SET utf8mb4;

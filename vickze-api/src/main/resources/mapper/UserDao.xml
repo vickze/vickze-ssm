@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.vickze.dao.UserDao">
+
+	<select id="get" resultType="io.vickze.entity.UserDO">
+		select * from t_user where id = #{value}
+	</select>
+
+	<select id="list" resultType="io.vickze.entity.UserDO">
+		select * from t_user
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by id desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="count" resultType="long">
+		select count(*) from t_user 
+	</select>
+	 
+	<insert id="save" parameterType="io.vickze.entity.UserDO" useGeneratedKeys="true" keyProperty="id">
+		insert into t_user
+		(
+			`nickname`, 
+			`password`, 
+			`salt`, 
+			`mobile`, 
+			`create_time`,
+			`last_modified_time`
+		)
+		values
+		(
+			#{nickname}, 
+			#{password}, 
+			#{salt}, 
+			#{mobile}, 
+			now(),
+			now()
+		)
+	</insert>
+	 
+	<update id="update" parameterType="io.vickze.entity.UserDO">
+		update t_user 
+		<set>
+			<if test="nickname != null">`nickname` = #{nickname}, </if>
+			<if test="password != null">`password` = #{password}, </if>
+			<if test="salt != null">`salt` = #{salt}, </if>
+			<if test="mobile != null">`mobile` = #{mobile}, </if>
+			<if test="createTime != null">`create_time` = #{createTime},</if>
+			`last_modified_time` = now()
+		</set>
+		where id = #{id}
+	</update>
+	
+	<delete id="delete">
+		delete from t_user where id = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from t_user where id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+	<select id="getByMobile" resultType="io.vickze.entity.UserDO">
+		select * from t_user where mobile = #{mobile}
+	</select>
+
+	<update id="updatePassword">
+		update t_user set `password` = #{newPassword}, `last_modified_time` = now()
+		where id = #{userId} and password = #{oldPassword}
+	</update>
+</mapper>
