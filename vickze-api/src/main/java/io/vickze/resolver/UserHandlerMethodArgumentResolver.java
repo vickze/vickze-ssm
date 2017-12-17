@@ -15,7 +15,7 @@ import io.vickze.service.UserService;
 
 /**
  * @author vick.zeng
- * @email 2512522383@qq.com
+ * @email zyk@yk95.top
  * @date 2017-12-12 15:41
  */
 @Component

@@ -8,7 +8,7 @@ import io.vickze.dao.BaseDao;
 
 /**
  * @author vick.zeng
- * @email 2512522383@qq.com
+ * @email zyk@yk95.top
  * @date 2017-12-07 17:06
  */
 public interface BaseService<ID extends Serializable, T> {

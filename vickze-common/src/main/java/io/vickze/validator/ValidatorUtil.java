@@ -14,7 +14,7 @@ import io.vickze.exception.CheckException;
  * 参考文档：http://docs.jboss.org/hibernate/validator/5.4/reference/en-US/html_single/
  *
  * @author vick.zeng
- * @email 2512522383@qq.com
+ * @email zyk@yk95.top
  * @create 2017-09-08 22:31
  */
 public class ValidatorUtil {

@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
  * Json处理工具类
  *
  * @author vick.zeng
- * @email 2512522383@qq.com
+ * @email zyk@yk95.top
  * @create 2017-09-08 22:31
  **/
 public class JsonUtil {

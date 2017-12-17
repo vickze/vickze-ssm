@@ -6,7 +6,7 @@ import java.io.Serializable;
 
 /**
  * @author vick.zeng
- * @email 2512522383@qq.com
+ * @email zyk@yk95.top
  * @date 2017-12-13 17:38
  */
 public class UpdatePasswordDO implements Serializable {

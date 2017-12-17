@@ -7,7 +7,7 @@ import java.util.Map;
  * 返回数据
  *
  * @author vick.zeng
- * @email 2512522383@qq.com
+ * @email zyk@yk95.top
  * @create 2017-09-08 22:07
  */
 public class ResultDO extends HashMap<String, Object> {

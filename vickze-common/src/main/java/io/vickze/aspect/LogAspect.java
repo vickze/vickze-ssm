@@ -18,7 +18,7 @@ import io.vickze.util.JsonUtil;
 
 /**
  * @author vick.zeng
- * @email 2512522383@qq.com
+ * @email zyk@yk95.top
  * @date 2017-09-29 15:56
  */
 @Aspect

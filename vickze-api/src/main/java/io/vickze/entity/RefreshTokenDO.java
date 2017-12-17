@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 /**
  * @author vick.zeng
- * @email 2512522383@qq.com
+ * @email zyk@yk95.top
  * @date 2017-12-14 14:39
  */
 public class RefreshTokenDO implements Serializable {

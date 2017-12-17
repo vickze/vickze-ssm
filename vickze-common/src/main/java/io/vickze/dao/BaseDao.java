@@ -8,7 +8,7 @@ import java.util.Map;
  * 基础Dao(还需在XML文件里，有对应的SQL语句)
  *
  * @author vick.zeng
- * @email 2512522383@qq.com
+ * @email zyk@yk95.top
  * @create 2017-09-08 22:07
  */
 public interface BaseDao<ID extends Serializable, T> {

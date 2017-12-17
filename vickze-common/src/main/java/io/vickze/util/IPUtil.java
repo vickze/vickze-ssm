@@ -10,7 +10,7 @@ import javax.servlet.http.HttpServletRequest;
  * IP地址工具类
  *
  * @author vick.zeng
- * @email 2512522383@qq.com
+ * @email zyk@yk95.top
  * @create 2017-09-10 0:17
  **/
 public class IPUtil {

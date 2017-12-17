@@ -4,7 +4,7 @@ package io.vickze.exception;
  * 自定义异常
  *
  * @author vick.zeng
- * @email 2512522383@qq.com
+ * @email zyk@yk95.top
  * @create 2017-09-08 22:07
  **/
 public class CheckException extends RuntimeException {
