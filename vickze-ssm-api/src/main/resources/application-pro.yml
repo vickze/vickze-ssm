@@ -1,0 +1,19 @@
+# Tomcat
+server:
+    tomcat:
+        uri-encoding: UTF-8
+        max-threads: 1000
+        min-spare-threads: 30
+    port: 8001
+
+spring:
+    http:
+        multipart:
+            max-file-size: 100MB
+            max-request-size: 100MB
+            enabled: true
+    # 指定静态资源的路径
+    resources:
+        static-locations: classpath:/swagger/
+
+
