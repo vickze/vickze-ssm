@@ -4,7 +4,7 @@ server:
         uri-encoding: UTF-8
         max-threads: 1000
         min-spare-threads: 30
-    port: 8001
+    port: 80
 
 spring:
     http:
@@ -15,5 +15,21 @@ spring:
     # 指定静态资源的路径
     resources:
         static-locations: classpath:/swagger/
+
+    dubbo:
+        application:
+            name: vickze-ssm-api
+        registry:
+            address: zookeeper://192.168.244.131:2181
+            protocol: zookeeper
+            group: spring
+            timeout: 5000
+        protocol:
+            name: dubbo
+            port: 20880
+        scan: io.vickze
+        consumer:
+            timeout: 5000
+            check: true
 
 

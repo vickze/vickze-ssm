@@ -7,6 +7,11 @@ import org.springframework.context.annotation.Configuration;
 
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
+import redis.clients.jedis.JedisShardInfo;
+import redis.clients.jedis.ShardedJedisPool;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author vick.zeng
@@ -17,6 +22,9 @@ import redis.clients.jedis.JedisPoolConfig;
 public class RedisConfig {
     @Value("${spring.redis.host}")
     private String host;
+
+    @Value("${spring.redis.hosts}")
+    private String hosts;
 
     @Value("${spring.redis.port}")
     private int port;
@@ -51,5 +59,32 @@ public class RedisConfig {
             return new JedisPool(jedisPoolConfig, host, port, timeout);
         }
         return new JedisPool(jedisPoolConfig, host, port, timeout, password);
+    }
+
+    @Bean
+    public ShardedJedisPool shardedJedisPool() {
+        JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
+        jedisPoolConfig.setMaxTotal(maxActive);
+        jedisPoolConfig.setMaxIdle(maxIdle);
+        jedisPoolConfig.setMaxWaitMillis(maxWait);
+        jedisPoolConfig.setMinIdle(minIdle);
+
+        List<JedisShardInfo> jedisShardInfoList = new ArrayList<>();
+        String[] hostList = hosts.split(",");
+
+        for (String host : hostList) {
+            JedisShardInfo jedisShardInfo = new JedisShardInfo(host);
+            //连接超时
+            jedisShardInfo.setConnectionTimeout(timeout);
+            //读取超时
+            jedisShardInfo.setSoTimeout(timeout);
+            if (!StringUtils.isBlank(password)) {
+                jedisShardInfo.setPassword(password);
+            }
+
+            jedisShardInfoList.add(jedisShardInfo);
+        }
+
+        return new ShardedJedisPool(jedisPoolConfig, jedisShardInfoList);
     }
 }

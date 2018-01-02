@@ -5,7 +5,7 @@
     <parent>
         <artifactId>vickze-ssm</artifactId>
         <groupId>io.vickze</groupId>
-        <version>${vickze-ssm-version}</version>
+        <version>1.0.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -14,10 +14,14 @@
     <dependencies>
         <dependency>
             <groupId>io.vickze</groupId>
-            <artifactId>vickze-ssm-web-common</artifactId>
-            <version>${vickze-ssm-version}</version>
+            <artifactId>vickze-ssm-common</artifactId>
+            <version>1.0.0</version>
         </dependency>
-
+        <dependency>
+            <groupId>io.vickze</groupId>
+            <artifactId>vickze-ssm-web-common</artifactId>
+            <version>1.0.0</version>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -47,6 +51,21 @@
             <optional>true</optional>
         </dependency>
         <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>dubbo</artifactId>
+            <version>${dubbo.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.shiro</groupId>
+            <artifactId>shiro-core</artifactId>
+            <version>${shiro.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.shiro</groupId>
+            <artifactId>shiro-spring</artifactId>
+            <version>${shiro.version}</version>
+        </dependency>
+        <dependency>
             <groupId>commons-lang</groupId>
             <artifactId>commons-lang</artifactId>
             <version>${commons.lang.version}</version>
@@ -72,4 +91,20 @@
             <version>${commons.configuration.version}</version>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.springframework</groupId>
+                        <artifactId>springloaded</artifactId>
+                        <version>1.2.5.RELEASE</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+        </plugins>
+    </build>
 </project>

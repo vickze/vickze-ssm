@@ -21,7 +21,7 @@ public interface UserService extends BaseService<Long, UserDO> {
     /**
      * 用户登录
      */
-    TokenDO login(UserDO userDO) throws InterruptedException;
+    TokenDO login(UserDO userDO);
 
     /**
      * 用户登出

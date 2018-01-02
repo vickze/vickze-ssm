@@ -6,17 +6,19 @@ import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.ShardedJedis;
+import redis.clients.jedis.ShardedJedisPool;
 
 /**
+ * 简易分布式锁
+ *
  * @author vick.zeng
  * @email zyk@yk95.top
  * @date 2017-12-07 16:27
  */
 public class RedisLock {
 
-    private JedisPool jedisPool;
+    private ShardedJedisPool shardedJedisPool;
 
 
     /**
@@ -56,9 +58,9 @@ public class RedisLock {
     private boolean locked = false;
 
 
-    public RedisLock(JedisPool jedisPool, String lockKey) {
+    public RedisLock(ShardedJedisPool shardedJedisPool, String lockKey) {
         this.lockId = UUID.randomUUID().toString();
-        this.jedisPool = jedisPool;
+        this.shardedJedisPool = shardedJedisPool;
         this.lockKey = lockKey;
     }
 
@@ -71,9 +73,9 @@ public class RedisLock {
      * @return
      */
     private boolean setNxAndExpire(final String key, final String value, final long expire) {
-        Jedis jedis = jedisPool.getResource();
-        String result = jedis.set(key, value, "NX", "PX", expire);
-        jedis.close();
+        ShardedJedis shardedJedis = shardedJedisPool.getResource();
+        String result = shardedJedis.set(key, value, "NX", "PX", expire);
+        shardedJedis.close();
         return "OK".equals(result);
     }
 
@@ -124,12 +126,12 @@ public class RedisLock {
      */
     public void unlock() {
         if (locked) {
-            Jedis jedis = jedisPool.getResource();
+            ShardedJedis shardedJedis = shardedJedisPool.getResource();
             //避免删除非自己获取得到的锁
-            if (lockId.equals(jedis.get(lockKey))) {
-                jedis.del(lockKey);
+            if (lockId.equals(shardedJedis.get(lockKey))) {
+                shardedJedis.del(lockKey);
             }
-            jedis.close();
+            shardedJedis.close();
             locked = Boolean.FALSE;
         }
     }
@@ -150,11 +152,11 @@ public class RedisLock {
     /**
      * 获取锁
      *
-     * @param jedisPool
+     * @param shardedJedisPool
      * @param lockKey
      * @return
      */
-    public static RedisLock getLock(JedisPool jedisPool, String lockKey) {
-        return new RedisLock(jedisPool, lockKey);
+    public static RedisLock getLock(ShardedJedisPool shardedJedisPool, String lockKey) {
+        return new RedisLock(shardedJedisPool, lockKey);
     }
 }

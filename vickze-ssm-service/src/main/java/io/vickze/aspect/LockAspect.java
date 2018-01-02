@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 import java.lang.reflect.Method;
 import java.text.MessageFormat;
 import io.vickze.exception.CheckException;
-import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.ShardedJedisPool;
 
 /**
  * @author vick.zeng
@@ -25,7 +25,7 @@ public class LockAspect {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
-    private JedisPool jedisPool;
+    private ShardedJedisPool shardedJedisPool;
 
     @Pointcut("@annotation(io.vickze.aspect.Lock)")
     public void lockPointcut() {
@@ -41,7 +41,7 @@ public class LockAspect {
 
         Object[] args = point.getArgs();
         String lockKey = MessageFormat.format(lock.value(), args);
-        RedisLock redisLock = RedisLock.getLock(jedisPool, lockKey);
+        RedisLock redisLock = RedisLock.getLock(shardedJedisPool, lockKey);
 
         long startTime = System.currentTimeMillis();
         try {

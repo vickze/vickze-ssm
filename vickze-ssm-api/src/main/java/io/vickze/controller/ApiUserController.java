@@ -40,7 +40,7 @@ public class ApiUserController {
     }
 
     @PostMapping("/login")
-    public TokenDO login(@RequestBody @Validated({Login.class}) UserDO userDO) throws InterruptedException {
+    public TokenDO login(@RequestBody @Validated({Login.class}) UserDO userDO) {
         return userService.login(userDO);
     }
 

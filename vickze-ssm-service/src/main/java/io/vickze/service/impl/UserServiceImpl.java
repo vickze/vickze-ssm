@@ -21,8 +21,8 @@ import io.vickze.entity.UserDO;
 import io.vickze.exception.CheckException;
 import io.vickze.service.TokenService;
 import io.vickze.service.UserService;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.ShardedJedis;
+import redis.clients.jedis.ShardedJedisPool;
 
 /**
  * @author vick.zeng
@@ -34,7 +34,7 @@ public class UserServiceImpl implements UserService {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
-    private JedisPool jedisPool;
+    private ShardedJedisPool shardedJedisPool;
 
     @Autowired
     private UserDao userDao;
@@ -62,8 +62,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public TokenDO login(UserDO userDO) throws InterruptedException {
-        Thread.sleep(5000);
+    public TokenDO login(UserDO userDO) {
         UserDO dbUser = userDao.getByMobile(userDO.getMobile());
         if (dbUser == null) {
             throw new CheckException("手机号未注册");
@@ -97,11 +96,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public TokenDO refreshToken(RefreshTokenDO refreshTokenDO) {
-        Jedis jedis = jedisPool.getResource();
+        ShardedJedis shardedJedis = shardedJedisPool.getResource();
         String refreshTokenKey = MessageFormat.format(TokenConstant.REFRESH_TOKEN_KEY, refreshTokenDO.getRefreshToken());
 
-        String json = jedis.get(refreshTokenKey);
-        jedis.close();
+        String json = shardedJedis.get(refreshTokenKey);
+        shardedJedis.close();
 
         if (json == null) {
             throw new CheckException("登录凭据已失效，请重新登录");
