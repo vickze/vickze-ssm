@@ -12,9 +12,13 @@ spring:
             max-file-size: 100MB
             max-request-size: 100MB
             enabled: true
+
+    mvc:
+      throw-exception-if-no-handler-found: true
+
     # 指定静态资源的路径
     resources:
-        static-locations: classpath:/swagger/
+        add-mappings: false
 
     dubbo:
         application:

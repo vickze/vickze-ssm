@@ -1,22 +1,30 @@
-package io.vickze.aspect;
+package io.vickze.lock;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.TimeoutUtils;
 
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
 
+import io.vickze.exception.CheckException;
 import redis.clients.jedis.ShardedJedis;
 import redis.clients.jedis.ShardedJedisPool;
 
 /**
- * 简易分布式锁
+ * Redis简易分布式锁
+ * setNx实现
  *
  * @author vick.zeng
  * @email zyk@yk95.top
  * @date 2017-12-07 16:27
  */
-public class RedisLock {
+public class RedisLock implements Lock {
+
+    private final Logger logger = LoggerFactory.getLogger(getClass());
 
     private ShardedJedisPool shardedJedisPool;
 
@@ -64,27 +72,27 @@ public class RedisLock {
         this.lockKey = lockKey;
     }
 
-    /**
-     * setNX命令不支持expire，所以使用set命令，同时使用nx与expire
-     *
-     * @param key
-     * @param value
-     * @param expire 毫秒
-     * @return
-     */
-    private boolean setNxAndExpire(final String key, final String value, final long expire) {
-        ShardedJedis shardedJedis = shardedJedisPool.getResource();
-        String result = shardedJedis.set(key, value, "NX", "PX", expire);
-        shardedJedis.close();
-        return "OK".equals(result);
+    @Override
+    public void lock() {
+        if (this.tryLock()) {
+            return;
+        }
+        throw new CheckException("服务器繁忙，请重试");
     }
 
-    public boolean lock() throws InterruptedException {
-        return lock(TIMEOUT_SECS, EXPIRE_SECS, TimeUnit.SECONDS);
+    @Override
+    public void lockInterruptibly() throws InterruptedException {
+        this.lock();
     }
 
-    public boolean lock(long timeoutSecs, long expireSecs, TimeUnit unit) throws InterruptedException {
-        return lock(TimeoutUtils.toMillis(timeoutSecs, unit), TimeoutUtils.toMillis(expireSecs, unit));
+    @Override
+    public boolean tryLock() {
+        try {
+            return this.tryLock(TIMEOUT_SECS, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            logger.warn(e.getMessage());
+            return Boolean.FALSE;
+        }
     }
 
     /**
@@ -93,15 +101,15 @@ public class RedisLock {
      * 执行过程：
      * 通过setNx尝试设置某个key的值，成功（当前没有这个锁）则返回，成功获得锁
      *
-     * @param timeoutSecs 锁等待时间毫秒
-     * @param expireSecs  锁超时时间毫秒（超过这个时间自动解锁）
+     * @param time 锁等待时间毫秒
      * @return
      * @throws InterruptedException
      */
-    public boolean lock(long timeoutSecs, long expireSecs) throws InterruptedException {
-        long timeout = timeoutSecs;
+    @Override
+    public boolean tryLock(long time, TimeUnit unit) throws InterruptedException {
+        long timeout = time;
         while (timeout >= 0) {
-            if (setNxAndExpire(lockKey, lockId, expireSecs)) {
+            if (setNxAndExpire(lockKey, lockId, EXPIRE_SECS)) {
                 // 获得锁
                 locked = Boolean.TRUE;
                 return Boolean.TRUE;
@@ -136,6 +144,11 @@ public class RedisLock {
         }
     }
 
+    @Override
+    public Condition newCondition() {
+        return null;
+    }
+
     /**
      * 生成[min - max]区间的随机毫秒
      *
@@ -150,13 +163,17 @@ public class RedisLock {
     }
 
     /**
-     * 获取锁
+     * setNX命令不支持expire，所以使用set命令，同时使用nx与expire
      *
-     * @param shardedJedisPool
-     * @param lockKey
+     * @param key
+     * @param value
+     * @param expire 毫秒
      * @return
      */
-    public static RedisLock getLock(ShardedJedisPool shardedJedisPool, String lockKey) {
-        return new RedisLock(shardedJedisPool, lockKey);
+    private boolean setNxAndExpire(final String key, final String value, final long expire) {
+        ShardedJedis shardedJedis = shardedJedisPool.getResource();
+        String result = shardedJedis.set(key, value, "NX", "PX", expire);
+        shardedJedis.close();
+        return "OK".equals(result);
     }
 }

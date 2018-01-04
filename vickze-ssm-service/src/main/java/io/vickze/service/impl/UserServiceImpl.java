@@ -29,7 +29,7 @@ import redis.clients.jedis.ShardedJedisPool;
  * @email zyk@yk95.top
  * @date 2017-12-12 15:42
  */
-@Service(interfaceClass = UserService.class, retries = 0, timeout = 5000)
+@Service(interfaceClass = UserService.class, timeout = 5000)
 public class UserServiceImpl implements UserService {
     private Logger logger = LoggerFactory.getLogger(getClass());
 

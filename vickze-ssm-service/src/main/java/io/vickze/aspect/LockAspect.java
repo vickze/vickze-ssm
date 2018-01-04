@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import java.lang.reflect.Method;
 import java.text.MessageFormat;
 import io.vickze.exception.CheckException;
+import io.vickze.lock.RedisLock;
 import redis.clients.jedis.ShardedJedisPool;
 
 /**
@@ -41,14 +42,14 @@ public class LockAspect {
 
         Object[] args = point.getArgs();
         String lockKey = MessageFormat.format(lock.value(), args);
-        RedisLock redisLock = RedisLock.getLock(shardedJedisPool, lockKey);
+        java.util.concurrent.locks.Lock redisLock = new RedisLock(shardedJedisPool, lockKey);
 
         long startTime = System.currentTimeMillis();
         try {
             //
             logger.debug(MessageFormat.format("尝试加锁，锁值：{0}", lockKey));
             // 加锁
-            if (redisLock.lock()) {
+            if (redisLock.tryLock()) {
                 // 拿到锁
                 logger.debug(MessageFormat.format("成功拿到锁，锁值：{0}", lockKey));
                 logger.debug(MessageFormat.format("耗时：{0}ms", System.currentTimeMillis() - startTime));

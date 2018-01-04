@@ -5,9 +5,12 @@ import io.vickze.entity.ResultDO;
 import org.apache.shiro.authz.AuthorizationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.NoHandlerFoundException;
 
 /**
  * 异常处理器
@@ -36,6 +39,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResultDO handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
         return ResultDO.error(e.getBindingResult().getFieldError().getDefaultMessage());
+    }
+
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(NoHandlerFoundException.class)
+    public ResultDO handleNoHandlerFoundException(NoHandlerFoundException e) {
+        logger.debug(e.getMessage());
+        return ResultDO.error(HttpStatus.NOT_FOUND.value(), e.getMessage());
     }
 
     @ExceptionHandler(Exception.class)

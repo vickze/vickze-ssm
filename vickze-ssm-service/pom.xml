@@ -102,7 +102,11 @@
             <artifactId>shiro-spring</artifactId>
             <version>${shiro.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.apache.zookeeper</groupId>
+            <artifactId>zookeeper</artifactId>
+            <version>3.5.2-alpha</version>
+        </dependency>
     </dependencies>
 
     <build>
