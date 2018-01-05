@@ -31,12 +31,12 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         if (!(handler instanceof HandlerMethod)) {
-            return Boolean.TRUE;
+            return true;
         }
 
         Auth auth = ((HandlerMethod) handler).getMethodAnnotation(Auth.class);
         if (auth == null) {
-            return Boolean.TRUE;
+            return true;
         }
 
         String token = request.getHeader("token");
@@ -56,6 +56,6 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
         //设置userId到request里，后续根据userId，获取用户信息
         request.setAttribute(UserConstant.LOGIN_USER_KEY, userId);
 
-        return Boolean.TRUE;
+        return true;
     }
 }

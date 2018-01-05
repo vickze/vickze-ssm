@@ -2,13 +2,14 @@ package io.vickze.lock;
 
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
-import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.ZooDefs;
 import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.data.Stat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -20,167 +21,208 @@ import java.util.concurrent.locks.Lock;
 /**
  * @author vick.zeng
  * @email zengyukang@hey900.com
- * @date 2018-01-03 17:05
+ * @date 2018-01-04 18:12
  */
-public class ZookeeperLock implements Lock, Watcher {
-    private ZooKeeper zk = null;
-    // 根节点
-    private String ROOT_LOCK = "/locks";
-    // 竞争的资源
-    private String lockName;
-    // 等待的前一个锁
-    private String WAIT_LOCK;
-    // 当前锁
-    private String CURRENT_LOCK;
-    // 计数器
-    private CountDownLatch countDownLatch;
-    private int sessionTimeout = 30000;
-    private List<Exception> exceptionList = new ArrayList<Exception>();
+public class ZookeeperLock implements Lock {
+    private final Logger logger = LoggerFactory.getLogger(getClass());
+
+    private ZooKeeper zooKeeper;
+    //锁根节点
+    private final String lockNamespace;
+    //锁值节点
+    private final String lockKey;
+    //当前节点
+    private String currentNode;
+    //等待的前一个节点
+    private String waitNode;
+    //计数器
+    private volatile CountDownLatch countDownLatch;
 
     /**
-     * 配置分布式锁
-     * @param config 连接的url
-     * @param lockName 竞争资源
+     * 是否持有锁
      */
-    public ZookeeperLock(String config, String lockName) {
-        this.lockName = lockName;
-        try {
-            // 连接zookeeper
-            zk = new ZooKeeper(config, sessionTimeout, this);
-            Stat stat = zk.exists(ROOT_LOCK, false);
-            if (stat == null) {
-                // 如果根节点不存在，则创建根节点
-                zk.create(ROOT_LOCK, new byte[0], ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (KeeperException e) {
-            e.printStackTrace();
-        }
+    private volatile boolean locked = false;
+
+    /**
+     * 锁等待时间，防止线程饥饿，默认10秒
+     */
+    private static final long TIMEOUT_SECS = 30;
+
+
+    public ZookeeperLock(String address, int timeout, String lockNamespace, String lockKey) {
+        init(address, timeout, lockNamespace);
+        this.lockNamespace = "/" + lockNamespace;
+        this.lockKey = lockKey + "_";
     }
 
-    // 节点监视器
-    public void process(WatchedEvent event) {
-        if (this.countDownLatch != null) {
-            this.countDownLatch.countDown();
-        }
-    }
-
-    public void lock() {
-        if (exceptionList.size() > 0) {
-            throw new LockException(exceptionList.get(0));
-        }
+    private void init(String address, int timeout, String lockNamespace) {
         try {
-            if (this.tryLock()) {
-                System.out.println(Thread.currentThread().getName() + " " + lockName + "获得了锁");
-                return;
-            } else {
-                // 等待锁
-                waitForLock(WAIT_LOCK, sessionTimeout);
-            }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (KeeperException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public boolean tryLock() {
-        try {
-            String splitStr = "_lock_";
-            if (lockName.contains(splitStr)) {
-                throw new LockException("锁名有误");
-            }
-            // 创建临时有序节点
-            CURRENT_LOCK = zk.create(ROOT_LOCK + "/" + lockName + splitStr, new byte[0],
-                    ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL_SEQUENTIAL);
-            System.out.println(CURRENT_LOCK + " 已经创建");
-            // 取所有子节点
-            List<String> subNodes = zk.getChildren(ROOT_LOCK, false);
-            // 取出所有lockName的锁
-            List<String> lockObjects = new ArrayList<String>();
-            for (String node : subNodes) {
-                String _node = node.split(splitStr)[0];
-                if (_node.equals(lockName)) {
-                    lockObjects.add(node);
-                }
-            }
-            Collections.sort(lockObjects);
-            System.out.println(Thread.currentThread().getName() + " 的锁是 " + CURRENT_LOCK);
-            // 若当前节点为最小节点，则获取锁成功
-            if (CURRENT_LOCK.equals(ROOT_LOCK + "/" + lockObjects.get(0))) {
-                return true;
-            }
-
-            // 若不是最小节点，则找到自己的前一个节点
-            String prevNode = CURRENT_LOCK.substring(CURRENT_LOCK.lastIndexOf("/") + 1);
-            WAIT_LOCK = lockObjects.get(Collections.binarySearch(lockObjects, prevNode) - 1);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (KeeperException e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    public boolean tryLock(long timeout, TimeUnit unit) {
-        try {
-            if (this.tryLock()) {
-                return true;
-            }
-            return waitForLock(WAIT_LOCK, timeout);
+            zooKeeper = new ZooKeeper(address, timeout, watchedEvent ->
+                    logger.debug("Zookeeper连接已建立...")
+            );
         } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    // 等待锁
-    private boolean waitForLock(String prev, long waitTime) throws KeeperException, InterruptedException {
-        Stat stat = zk.exists(ROOT_LOCK + "/" + prev, true);
-
-        if (stat != null) {
-            System.out.println(Thread.currentThread().getName() + "等待锁 " + ROOT_LOCK + "/" + prev);
-            this.countDownLatch = new CountDownLatch(1);
-            // 计数等待，若等到前一个节点消失，则precess中进行countDown，停止等待，获取锁
-            this.countDownLatch.await(waitTime, TimeUnit.MILLISECONDS);
-            this.countDownLatch = null;
-            System.out.println(Thread.currentThread().getName() + " 等到了锁");
-        }
-        return true;
-    }
-
-    public void unlock() {
-        try {
-            System.out.println("释放锁 " + CURRENT_LOCK);
-            zk.delete(CURRENT_LOCK, -1);
-            CURRENT_LOCK = null;
-            zk.close();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (KeeperException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e.getCause());
+            throw new RuntimeException(e.getMessage(), e.getCause());
         }
     }
 
-    public Condition newCondition() {
-        return null;
+    @Override
+    public void lock() {
+        if (this.tryLock()) {
+            return;
+        }
+        throw new RuntimeException("服务器繁忙，请重试");
     }
 
+    @Override
     public void lockInterruptibly() throws InterruptedException {
         this.lock();
     }
 
-
-    public class LockException extends RuntimeException {
-        private static final long serialVersionUID = 1L;
-        public LockException(String e){
-            super(e);
+    @Override
+    public boolean tryLock() {
+        try {
+            return this.tryLock(TIMEOUT_SECS, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
-        public LockException(Exception e){
-            super(e);
+    }
+
+    /**
+     * Zookeeper分布式锁
+     * 实现思路：
+     *   使用Zookeeper最小节点的方式
+     * 执行过程：
+     *   1、创建根节点，在根节点下创建顺序节点
+     *   2、如当前创建的节点为根节点的所有子节点中最小的，则获取锁成功；
+     *   否则，找到当前节点的前一个节点，watch前一个节点，当前一个节点被删除时获得锁；另外，等待超时也不能获得锁
+     */
+    @Override
+    public boolean tryLock(long time, TimeUnit unit) throws InterruptedException {
+        long startTime = System.currentTimeMillis();
+        String lock = lockNamespace + "/" + lockKey;
+
+        try {
+            //确保zookeeper连接成功
+            ensureZookeeperConnect();
+            //确保根节点存在
+            ensureNameSpaceExist(lockNamespace);
+
+            //创建临时有序节点
+            //节点目录为/xx/xx，节点为lockKey_xxx
+            //currentNode值为lockKey_xxx
+            currentNode = zooKeeper.create(lock, new byte[0],
+                    ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL_SEQUENTIAL).replace(lockNamespace + "/", "");
+            lock = lockNamespace + "/" + currentNode;
+            logger.debug("尝试加锁，锁值：{}", lock);
+
+            //取出所有子节点
+            List<String> childrenList = zooKeeper.getChildren(lockNamespace, false);
+            //竞争的节点列表
+            List<String> lockNodes = new ArrayList<>();
+            for (String children : childrenList) {
+                if (children.startsWith(lockKey)) {
+                    lockNodes.add(children);
+                }
+            }
+            //排序
+            Collections.sort(lockNodes);
+            //如当前节点为最小节点，则成功获取锁
+            if (currentNode.equals(lockNodes.get(0))) {
+                locked = true;
+                return true;
+            }
+            //找到当前节点的前一个节点
+            waitNode = lockNodes.get(Collections.binarySearch(lockNodes, currentNode) - 1);
+            //等待锁
+            waitLock(time, unit);
+
+            return locked;
+        } catch (KeeperException e) {
+            logger.error(e.getMessage(), e.getCause());
+            throw new RuntimeException(e);
+        } finally {
+            if (locked) {
+                logger.debug("成功拿到锁，锁值：{}", lock);
+            } else {
+                logger.debug("未能拿到锁，锁值：{}", lock);
+            }
+            logger.debug("耗时：{}ms", System.currentTimeMillis() - startTime);
+        }
+    }
+
+    /**
+     * 释放锁
+     */
+    @Override
+    public void unlock() {
+        try {
+            if (locked) {
+                String lock = lockNamespace + "/" + currentNode;
+                logger.debug("释放锁：{}", lock);
+                zooKeeper.delete(lockNamespace + "/" + currentNode, -1);
+            }
+            zooKeeper.close();
+        } catch (InterruptedException | KeeperException e) {
+            logger.error(e.getMessage(), e.getCause());
+        }
+    }
+
+    @Override
+    public Condition newCondition() {
+        return null;
+    }
+
+    /**
+     * 等待锁
+     */
+    private void waitLock(long time, TimeUnit unit) throws KeeperException, InterruptedException {
+        String waitLock = lockNamespace + "/" + waitNode;
+        logger.debug("等待锁：" + waitLock);
+
+        Stat stat = zooKeeper.exists(waitLock, watchedEvent -> {
+            if (countDownLatch != null) {
+                countDownLatch.countDown();
+                locked = true;
+            }
+        });
+
+        //前一个节点此刻存在，等待，节点消失则成功获取锁
+        if (stat != null) {
+            countDownLatch = new CountDownLatch(1);
+            countDownLatch.await(time, unit);
+            countDownLatch = null;
+        } else {
+            //前一个节点此刻不存在，获得锁
+            locked = true;
+        }
+    }
+
+    /**
+     * 确保根节点存在
+     */
+    private void ensureNameSpaceExist(String lockNamespace) throws KeeperException, InterruptedException {
+        Stat statS = zooKeeper.exists(lockNamespace, false);
+        if (statS == null) {
+            //如果根节点不存在，创建
+            zooKeeper.create(lockNamespace, new byte[0], ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+        }
+    }
+
+    /**
+     * 确保zookeeper连接成功，防止出现连接还未完成就执行zookeeper的get/create/exsit操作出现错误KeeperErrorCode = ConnectionLoss
+     */
+    private void ensureZookeeperConnect() throws InterruptedException {
+        CountDownLatch connectedLatch = new CountDownLatch(1);
+        zooKeeper.register(watchedEvent -> {
+            if (watchedEvent.getState() == Watcher.Event.KeeperState.SyncConnected) {
+                connectedLatch.countDown();
+
+            }
+        });
+        //zookeeper连接中则等待
+        if (ZooKeeper.States.CONNECTING == zooKeeper.getState()) {
+            connectedLatch.await();
         }
     }
 }

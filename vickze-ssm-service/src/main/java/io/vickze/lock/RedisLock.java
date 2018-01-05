@@ -1,16 +1,18 @@
 package io.vickze.lock;
 
+import com.alibaba.druid.sql.dialect.oracle.ast.expr.OracleSizeExpr;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.TimeoutUtils;
 
+import java.text.MessageFormat;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 
-import io.vickze.exception.CheckException;
 import redis.clients.jedis.ShardedJedis;
 import redis.clients.jedis.ShardedJedisPool;
 
@@ -28,11 +30,15 @@ public class RedisLock implements Lock {
 
     private ShardedJedisPool shardedJedisPool;
 
-
     /**
      * 锁ID
      */
     private final String lockId;
+
+    /**
+     * 锁命名空间
+     */
+    private final String lockNameSpace;
 
     /**
      * 锁key值
@@ -59,16 +65,16 @@ public class RedisLock implements Lock {
      */
     private static final int MAX_RANDOM_SECS = 300;
 
-
     /**
      * 是否持有锁
      */
-    private boolean locked = false;
+    private volatile boolean locked = false;
 
 
-    public RedisLock(ShardedJedisPool shardedJedisPool, String lockKey) {
+    public RedisLock(ShardedJedisPool shardedJedisPool, String lockNameSpace, String lockKey) {
         this.lockId = UUID.randomUUID().toString();
         this.shardedJedisPool = shardedJedisPool;
+        this.lockNameSpace = lockNameSpace + ":";
         this.lockKey = lockKey;
     }
 
@@ -77,7 +83,7 @@ public class RedisLock implements Lock {
         if (this.tryLock()) {
             return;
         }
-        throw new CheckException("服务器繁忙，请重试");
+        throw new RuntimeException("服务器繁忙，请重试");
     }
 
     @Override
@@ -90,16 +96,17 @@ public class RedisLock implements Lock {
         try {
             return this.tryLock(TIMEOUT_SECS, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
-            logger.warn(e.getMessage());
-            return Boolean.FALSE;
+            throw new RuntimeException(e);
         }
     }
 
     /**
-     * 获得锁
-     * 实现思路：使用了redis的set nx expire命令，缓存锁
+     * Redis分布式锁
+     * 实现思路：
+     * 使用了redis的set nx expire命令，缓存锁
      * 执行过程：
      * 通过setNx尝试设置某个key的值，成功（当前没有这个锁）则返回，成功获得锁
+     * 失败，则等待，继续尝试获取锁，如等待超时，返回（未获得锁）
      *
      * @param time 锁等待时间毫秒
      * @return
@@ -107,12 +114,18 @@ public class RedisLock implements Lock {
      */
     @Override
     public boolean tryLock(long time, TimeUnit unit) throws InterruptedException {
-        long timeout = time;
+        long startTime = System.currentTimeMillis();
+        String lock = lockNameSpace + lockKey;
+        logger.debug(MessageFormat.format("尝试加锁，锁值：{0}", lock));
+
+        long timeout = TimeoutUtils.toMillis(time, unit);
         while (timeout >= 0) {
-            if (setNxAndExpire(lockKey, lockId, EXPIRE_SECS)) {
+            if (setNxAndExpire(lock, lockId, EXPIRE_SECS)) {
                 // 获得锁
-                locked = Boolean.TRUE;
-                return Boolean.TRUE;
+                logger.debug(MessageFormat.format("成功拿到锁，锁值：{0}", lock));
+                logger.debug(MessageFormat.format("耗时：{0}ms", System.currentTimeMillis() - startTime));
+                locked = true;
+                return true;
             }
 
             // 生成[10-200]区间的随机毫秒
@@ -126,7 +139,9 @@ public class RedisLock implements Lock {
             Thread.sleep(delayMills);
         }
 
-        return Boolean.FALSE;
+        logger.debug(MessageFormat.format("未能拿到锁，锁值：{0}", lock));
+        logger.debug(MessageFormat.format("耗时：{0}ms", System.currentTimeMillis() - startTime));
+        return false;
     }
 
     /**
@@ -134,13 +149,15 @@ public class RedisLock implements Lock {
      */
     public void unlock() {
         if (locked) {
+            String lock = lockNameSpace + lockKey;
             ShardedJedis shardedJedis = shardedJedisPool.getResource();
             //避免删除非自己获取得到的锁
-            if (lockId.equals(shardedJedis.get(lockKey))) {
-                shardedJedis.del(lockKey);
+            if (lockId.equals(shardedJedis.get(lock))) {
+                logger.debug(MessageFormat.format("释放锁，锁值：{0}", lock));
+                shardedJedis.del(lock);
             }
             shardedJedis.close();
-            locked = Boolean.FALSE;
+            locked = false;
         }
     }
 

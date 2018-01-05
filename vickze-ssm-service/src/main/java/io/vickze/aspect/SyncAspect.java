@@ -22,13 +22,13 @@ import redis.clients.jedis.ShardedJedisPool;
  */
 @Aspect
 @Component
-public class LockAspect {
+public class SyncAspect {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
     private ShardedJedisPool shardedJedisPool;
 
-    @Pointcut("@annotation(io.vickze.aspect.Lock)")
+    @Pointcut("@annotation(io.vickze.aspect.Sync)")
     public void lockPointcut() {
 
     }
@@ -38,11 +38,11 @@ public class LockAspect {
         MethodSignature signature = (MethodSignature) point.getSignature();
         //拿到接口方法
         Method method = signature.getMethod();
-        Lock lock = method.getAnnotation(Lock.class);
+        Sync sync = method.getAnnotation(Sync.class);
 
         Object[] args = point.getArgs();
-        String lockKey = MessageFormat.format(lock.value(), args);
-        java.util.concurrent.locks.Lock redisLock = new RedisLock(shardedJedisPool, lockKey);
+        String lockKey = MessageFormat.format(sync.lockKey(), args);
+        java.util.concurrent.locks.Lock redisLock = new RedisLock(shardedJedisPool, sync.lockNameSpace(), lockKey);
 
         long startTime = System.currentTimeMillis();
         try {

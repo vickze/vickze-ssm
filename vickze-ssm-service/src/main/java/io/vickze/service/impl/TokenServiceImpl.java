@@ -11,7 +11,7 @@ import java.text.MessageFormat;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import io.vickze.aspect.Lock;
+import io.vickze.aspect.Sync;
 import io.vickze.constant.TokenConstant;
 import io.vickze.constant.UserConstant;
 import io.vickze.entity.TokenDO;
@@ -28,7 +28,8 @@ import redis.clients.jedis.ShardedJedisPool;
 public class TokenServiceImpl implements TokenService {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    private static final String LOCK_USER_TOKEN_KEY = "lock:user:token:{0}";
+    private static final String LOCK_USER_TOKEN_NAMESPACE = "lock:user:token";
+    private static final String LOCK_USER_TOKEN_KEY = "{0}";
 
     @Autowired
     private ShardedJedisPool shardedJedisPool;
@@ -44,7 +45,7 @@ public class TokenServiceImpl implements TokenService {
     }
 
     @Override
-    @Lock(LOCK_USER_TOKEN_KEY)
+    @Sync(lockNameSpace = LOCK_USER_TOKEN_NAMESPACE, lockKey = LOCK_USER_TOKEN_KEY)
     public TokenDO generateToken(long userId) {
         String token = generateValue();
         String refreshToken = generateValue();
