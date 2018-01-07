@@ -114,16 +114,12 @@ public class RedisLock implements Lock {
      */
     @Override
     public boolean tryLock(long time, TimeUnit unit) throws InterruptedException {
-        long startTime = System.currentTimeMillis();
         String lock = lockNameSpace + lockKey;
-        logger.debug(MessageFormat.format("尝试加锁，锁值：{0}", lock));
 
         long timeout = TimeoutUtils.toMillis(time, unit);
         while (timeout >= 0) {
             if (setNxAndExpire(lock, lockId, EXPIRE_SECS)) {
                 // 获得锁
-                logger.debug(MessageFormat.format("成功拿到锁，锁值：{0}", lock));
-                logger.debug(MessageFormat.format("耗时：{0}ms", System.currentTimeMillis() - startTime));
                 locked = true;
                 return true;
             }
@@ -131,6 +127,7 @@ public class RedisLock implements Lock {
             // 生成[10-200]区间的随机毫秒
             long delayMills = generateRandomMills(MIN_RANDOM_SECS, MAX_RANDOM_SECS);
             timeout -= delayMills;
+            logger.debug("等待锁，锁ID：{}，锁值：{}，等待时长：{}ms", lockId, lock, delayMills);
             /*
                 延迟随机毫秒,防止饥饿进程的出现,即,当同时到达多个进程,只会有一个进程获得锁,其他的都用同样的频率进行尝试,
                 后面有来了一些进行,也以同样的频率申请锁,这将可能导致前面来的锁得不到满足.
@@ -139,8 +136,6 @@ public class RedisLock implements Lock {
             Thread.sleep(delayMills);
         }
 
-        logger.debug(MessageFormat.format("未能拿到锁，锁值：{0}", lock));
-        logger.debug(MessageFormat.format("耗时：{0}ms", System.currentTimeMillis() - startTime));
         return false;
     }
 
@@ -153,7 +148,6 @@ public class RedisLock implements Lock {
             ShardedJedis shardedJedis = shardedJedisPool.getResource();
             //避免删除非自己获取得到的锁
             if (lockId.equals(shardedJedis.get(lock))) {
-                logger.debug(MessageFormat.format("释放锁，锁值：{0}", lock));
                 shardedJedis.del(lock);
             }
             shardedJedis.close();

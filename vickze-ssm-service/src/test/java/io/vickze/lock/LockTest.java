@@ -4,12 +4,14 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.locks.Lock;
-import redis.clients.jedis.ShardedJedis;
 import redis.clients.jedis.ShardedJedisPool;
 
 /**
@@ -20,95 +22,123 @@ import redis.clients.jedis.ShardedJedisPool;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class LockTest {
+    private final Logger logger = LoggerFactory.getLogger(getClass());
+
     @Autowired
     private ShardedJedisPool shardedJedisPool;
 
-    private ShardedJedis shardedJedis;
+    private int stock = 500;
 
-    private final static String REDIS_LOCK_KEY = "lock_test_stock";
+    private final int threads = 510;
+
+    private volatile int i = 0;
+
+    private volatile int j = 0;
+
+    private volatile int k = 0;
+
+    private volatile int l = 0;
+
+    private CountDownLatch countDownLatch = new CountDownLatch(threads);
 
     @Before
     public void before() {
-        shardedJedis = shardedJedisPool.getResource();
-        shardedJedis.set(REDIS_LOCK_KEY, "500");
     }
 
     @After
     public void after() {
-        shardedJedis.del(REDIS_LOCK_KEY);
-        shardedJedis.close();
     }
 
     @Test
     public void redisLockTest() throws InterruptedException {
         // 多线程测试
-        for (int i = 0; i < 510; i++) {
-            Lock redisLock = new RedisLock(shardedJedisPool, "lock", "test");
-
+        for (int n = 0; n < threads; n++) {
             new Thread(() -> {
+                Lock redisLock = new RedisLock(shardedJedisPool, "lock", "test");
+
                 long startTime = System.currentTimeMillis();
-                ShardedJedis jedis = shardedJedisPool.getResource();
                 try {
                     if (redisLock.tryLock()) {
-                        Integer x = Integer.parseInt(jedis.get(REDIS_LOCK_KEY));
-                        if (x > 0) {
-                            System.out.println("剩余库存:" + x);
-                            --x;
-                            shardedJedis.set(REDIS_LOCK_KEY, x.toString());
+                        if (stock > 0) {
+                            stock--;
+                            i++;
+                            logger.debug("剩余库存:{}", stock);
                         } else {
-                            System.out.println("没有更多库存了");
+                            j++;
                         }
                     } else {
-                        System.out.println("未能拿到锁");
+                        k++;
                     }
+                    logger.debug("花费：{}ms", System.currentTimeMillis() - startTime);
                 } catch (Exception e) {
+                    l++;
                     e.printStackTrace();
                 } finally {
-                    jedis.close();
                     redisLock.unlock();
+                    countDownLatch.countDown();
                 }
-                System.out.println("花费：" + (System.currentTimeMillis() - startTime) + "ms");
             }).start();
         }
 
-        // 主线程休眠20秒，不然主线程结束子线程不会执行
-        Thread.sleep(60000);
+        // 主线程休眠，不然主线程结束子线程不会执行
+        countDownLatch.await();
+
+        logger.debug("已减库存 {}", i);
+        logger.debug("没有更多库存了 {}", j);
+        logger.debug("未能拿到锁 {}", k);
+        logger.debug("获取锁异常 {}", l);
+
+        if (i + j + k + l == threads) {
+            logger.debug("成功锁住代码块");
+        } else {
+            logger.error("未能锁住代码块");
+        }
     }
 
 
     @Test
     public void zookeeperLockTest() throws InterruptedException {
         // 多线程测试
-        for (int i = 0; i < 510; i++) {
-            Lock zookeeperLock = new ZookeeperLock("127.0.0.1:2181", 3000, "lock", "test");
-
+        for (int n = 0; n < threads; n++) {
             new Thread(() -> {
+                Lock zookeeperLock = new ZookeeperLock("127.0.0.1:2181", 3000, "lock", "test");
+
                 long startTime = System.currentTimeMillis();
-                ShardedJedis jedis = shardedJedisPool.getResource();
                 try {
                     if (zookeeperLock.tryLock()) {
-                        Integer x = Integer.parseInt(jedis.get(REDIS_LOCK_KEY));
-                        if (x > 0) {
-                            System.out.println("剩余库存:" + x);
-                            --x;
-                            shardedJedis.set(REDIS_LOCK_KEY, x.toString());
+                        if (stock > 0) {
+                            stock--;
+                            i++;
+                            logger.debug("剩余库存:{}", stock);
                         } else {
-                            System.out.println("没有更多库存了");
+                            j++;
                         }
                     } else {
-                        System.out.println("未能拿到锁");
+                        k++;
                     }
+                    logger.debug("花费：{}ms", System.currentTimeMillis() - startTime);
                 } catch (Exception e) {
+                    l++;
                     e.printStackTrace();
                 } finally {
-                    jedis.close();
                     zookeeperLock.unlock();
+                    countDownLatch.countDown();
                 }
-                System.out.println("花费：" + (System.currentTimeMillis() - startTime) + "ms");
             }).start();
         }
 
-        // 主线程休眠20秒，不然主线程结束子线程不会执行
-        Thread.sleep(60000);
+        // 主线程休眠，不然主线程结束子线程不会执行
+        countDownLatch.await();
+
+        logger.debug("已减库存 {}", i);
+        logger.debug("没有更多库存了 {}", j);
+        logger.debug("未能拿到锁 {}", k);
+        logger.debug("获取锁异常 {}", l);
+
+        if (i + j + k + l == threads) {
+            logger.debug("成功锁住代码块");
+        } else {
+            logger.error("未能锁住代码块");
+        }
     }
 }

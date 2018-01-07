@@ -99,7 +99,6 @@ public class ZookeeperLock implements Lock {
      */
     @Override
     public boolean tryLock(long time, TimeUnit unit) throws InterruptedException {
-        long startTime = System.currentTimeMillis();
         String lock = lockNamespace + "/" + lockKey;
 
         try {
@@ -113,8 +112,6 @@ public class ZookeeperLock implements Lock {
             //currentNode值为lockKey_xxx
             currentNode = zooKeeper.create(lock, new byte[0],
                     ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL_SEQUENTIAL).replace(lockNamespace + "/", "");
-            lock = lockNamespace + "/" + currentNode;
-            logger.debug("尝试加锁，锁值：{}", lock);
 
             //取出所有子节点
             List<String> childrenList = zooKeeper.getChildren(lockNamespace, false);
@@ -141,13 +138,6 @@ public class ZookeeperLock implements Lock {
         } catch (KeeperException e) {
             logger.error(e.getMessage(), e.getCause());
             throw new RuntimeException(e);
-        } finally {
-            if (locked) {
-                logger.debug("成功拿到锁，锁值：{}", lock);
-            } else {
-                logger.debug("未能拿到锁，锁值：{}", lock);
-            }
-            logger.debug("耗时：{}ms", System.currentTimeMillis() - startTime);
         }
     }
 
@@ -157,11 +147,7 @@ public class ZookeeperLock implements Lock {
     @Override
     public void unlock() {
         try {
-            if (locked) {
-                String lock = lockNamespace + "/" + currentNode;
-                logger.debug("释放锁：{}", lock);
-                zooKeeper.delete(lockNamespace + "/" + currentNode, -1);
-            }
+            zooKeeper.delete(lockNamespace + "/" + currentNode, -1);
             zooKeeper.close();
         } catch (InterruptedException | KeeperException e) {
             logger.error(e.getMessage(), e.getCause());
@@ -178,12 +164,12 @@ public class ZookeeperLock implements Lock {
      */
     private void waitLock(long time, TimeUnit unit) throws KeeperException, InterruptedException {
         String waitLock = lockNamespace + "/" + waitNode;
-        logger.debug("等待锁：" + waitLock);
+        logger.debug("等待锁 {} 释放", waitLock);
 
         Stat stat = zooKeeper.exists(waitLock, watchedEvent -> {
             if (countDownLatch != null) {
-                countDownLatch.countDown();
                 locked = true;
+                countDownLatch.countDown();
             }
         });
 
@@ -217,7 +203,6 @@ public class ZookeeperLock implements Lock {
         zooKeeper.register(watchedEvent -> {
             if (watchedEvent.getState() == Watcher.Event.KeeperState.SyncConnected) {
                 connectedLatch.countDown();
-
             }
         });
         //zookeeper连接中则等待
