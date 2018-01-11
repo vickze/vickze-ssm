@@ -1,6 +1,6 @@
 # mysql
 spring:
-    # 环境 dev|test|pro
+    # 环境 dev|doc|pro
     profiles:
         active: dev
     datasource:

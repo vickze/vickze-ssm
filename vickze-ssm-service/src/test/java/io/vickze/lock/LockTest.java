@@ -54,7 +54,7 @@ public class LockTest {
         // 多线程测试
         for (int n = 0; n < threads; n++) {
             new Thread(() -> {
-                Lock redisLock = new RedisLock(shardedJedisPool, "lock", "test");
+                Lock redisLock = new RedisLock(shardedJedisPool, "lock", "doc");
 
                 long startTime = System.currentTimeMillis();
                 try {
@@ -101,7 +101,7 @@ public class LockTest {
         // 多线程测试
         for (int n = 0; n < threads; n++) {
             new Thread(() -> {
-                Lock zookeeperLock = new ZookeeperLock("127.0.0.1:2181", 3000, "lock", "test");
+                Lock zookeeperLock = new ZookeeperLock("127.0.0.1:2181", 3000, "lock", "doc");
 
                 long startTime = System.currentTimeMillis();
                 try {

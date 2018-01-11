@@ -9,9 +9,9 @@ import io.vickze.entity.TokenDO;
  */
 public interface TokenService {
     /**
-     * 根据token获取用户ID
+     * 检验token，返回用户ID
      */
-    long getUserIdByToken(String token);
+    long validToken(String token);
 
     /**
      * 生成token
@@ -22,4 +22,9 @@ public interface TokenService {
      * 移除token
      */
     void removeUserToken(long userId);
+
+    /**
+     * 验证token是否可刷新，返回用户ID
+     */
+    long validTokenCanRefresh(String token);
 }

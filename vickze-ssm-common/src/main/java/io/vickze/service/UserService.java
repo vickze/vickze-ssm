@@ -1,6 +1,5 @@
 package io.vickze.service;
 
-import io.vickze.entity.RefreshTokenDO;
 import io.vickze.entity.ResultDO;
 import io.vickze.entity.TokenDO;
 import io.vickze.entity.UpdatePasswordDO;
@@ -34,9 +33,7 @@ public interface UserService extends BaseService<Long, UserDO> {
     ResultDO updatePassword(UserDO userDO, UpdatePasswordDO updatePasswordDO);
 
     /**
-     * 通过refresh_token重新获取token
+     * 重新获取token
      */
-    TokenDO refreshToken(RefreshTokenDO refreshTokenDO);
-
-
+    TokenDO refreshToken(String token);
 }

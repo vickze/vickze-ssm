@@ -12,12 +12,8 @@ public class TokenDO implements Serializable {
 
     private String token;
 
-    private long tokenExpire;
+    private long expire;
 
-    //过期时间为30天，当token过期后可以通过refreshToken重新获取token、refreshToken，当用户超过30天未使用app，则不会自动登录
-    private String refreshToken;
-
-    private long refreshTokenExpire;
 
     public String getToken() {
         return token;
@@ -27,27 +23,11 @@ public class TokenDO implements Serializable {
         this.token = token;
     }
 
-    public long getTokenExpire() {
-        return tokenExpire;
+    public long getExpire() {
+        return expire;
     }
 
-    public void setTokenExpire(long tokenExpire) {
-        this.tokenExpire = tokenExpire;
-    }
-
-    public String getRefreshToken() {
-        return refreshToken;
-    }
-
-    public void setRefreshToken(String refreshToken) {
-        this.refreshToken = refreshToken;
-    }
-
-    public long getRefreshTokenExpire() {
-        return refreshTokenExpire;
-    }
-
-    public void setRefreshTokenExpire(long refreshTokenExpire) {
-        this.refreshTokenExpire = refreshTokenExpire;
+    public void setExpire(long expire) {
+        this.expire = expire;
     }
 }

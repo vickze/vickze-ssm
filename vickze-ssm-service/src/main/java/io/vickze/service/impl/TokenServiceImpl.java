@@ -5,12 +5,15 @@ import com.alibaba.dubbo.config.annotation.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.TimeoutUtils;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.text.MessageFormat;
-import java.util.UUID;
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import io.vickze.aspect.Sync;
 import io.vickze.constant.TokenConstant;
 import io.vickze.constant.UserConstant;
@@ -24,58 +27,47 @@ import redis.clients.jedis.ShardedJedisPool;
  * @email zyk@yk95.top
  * @date 2017-12-12 15:32
  */
-@Service(interfaceClass = TokenService.class)
+@Service(interfaceClass = TokenService.class, timeout = 5000)
 public class TokenServiceImpl implements TokenService {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
+    @Value("${jwt.secret}")
+    private String secret;
+
     private static final String LOCK_USER_TOKEN_NAMESPACE = "lock:user:token";
     private static final String LOCK_USER_TOKEN_KEY = "{0}";
+
+    /**
+     * Jwt过期时间6小时
+     */
+    private static final long EXPIRE = TimeUnit.HOURS.toMillis(6);
+    /**
+     * 刷新Jwt过期时间15天
+     */
+    private static final long REFRESH_EXPIRE = TimeUnit.DAYS.toMillis(15);
 
     @Autowired
     private ShardedJedisPool shardedJedisPool;
 
     @Override
-    public long getUserIdByToken(String token) {
-        ShardedJedis shardedJedis = shardedJedisPool.getResource();
-        String key = MessageFormat.format(TokenConstant.TOKEN_KEY, token);
-        String json = shardedJedis.get(key);
-        shardedJedis.close();
-
-        return json == null ? UserConstant.UN_LOGIN : Long.parseLong(json);
+    public long validToken(String token) {
+        return validToken(token, false);
     }
 
     @Override
     @Sync(lockNameSpace = LOCK_USER_TOKEN_NAMESPACE, lockKey = LOCK_USER_TOKEN_KEY)
     public TokenDO generateToken(long userId) {
-        String token = generateValue();
-        String refreshToken = generateValue();
+        String token = genJwt(userId);
 
         ShardedJedis shardedJedis = shardedJedisPool.getResource();
         String userKey = MessageFormat.format(TokenConstant.USER_KEY, userId);
-        String tokenKey = MessageFormat.format(TokenConstant.TOKEN_KEY, token);
-        String refreshTokenKey = MessageFormat.format(TokenConstant.REFRESH_TOKEN_KEY, refreshToken);
-
-        long tokenExpire = TimeoutUtils.toMillis(1, TimeUnit.DAYS);
-        long refreshTokenExpire = TimeoutUtils.toMillis(15, TimeUnit.DAYS);
-
-        //用户重新登录，移除旧token
-        removeOldToken(userKey, shardedJedis);
-        //保存用户token信息到缓存，实现单点登录功能
-        shardedJedis.hset(userKey, TokenConstant.USER_TOKEN_HASH_KEY,  token);
-        shardedJedis.hset(userKey, TokenConstant.USER_REFRESH_TOKEN_HASH_KEY,  refreshToken);
-
-        //token过期时间为1天
-        shardedJedis.set(tokenKey, String.valueOf(userId), "NX", "PX", tokenExpire);
-        //refreshToken过期时间为15天，超过15天用户需重新登录
-        shardedJedis.set(refreshTokenKey, String.valueOf(userId), "NX", "PX", refreshTokenExpire);
-
+        //保存用户token信息到缓存，实现单端登录功能
+        shardedJedis.hset(userKey, TokenConstant.USER_TOKEN_HASH_KEY, token);
         shardedJedis.close();
 
         TokenDO tokenDO = new TokenDO();
         tokenDO.setToken(token);
-        tokenDO.setRefreshToken(refreshToken);
-        tokenDO.setTokenExpire(tokenExpire);
-        tokenDO.setRefreshTokenExpire(refreshTokenExpire);
+        tokenDO.setExpire(EXPIRE);
 
         return tokenDO;
     }
@@ -84,34 +76,68 @@ public class TokenServiceImpl implements TokenService {
     public void removeUserToken(long userId) {
         ShardedJedis shardedJedis = shardedJedisPool.getResource();
         String userKey = MessageFormat.format(TokenConstant.USER_KEY, userId);
-
-        removeOldToken(userKey, shardedJedis);
-
+        shardedJedis.hdel(userKey, TokenConstant.USER_TOKEN_HASH_KEY);
         shardedJedis.close();
     }
 
-    /**
-     * 用户重新登录，移除旧token
-     */
-    private void removeOldToken(String userKey, ShardedJedis shardedJedis) {
-        String oldToken = shardedJedis.hget(userKey, TokenConstant.USER_TOKEN_HASH_KEY);
-        String oldRefreshToken = shardedJedis.hget(userKey, TokenConstant.USER_REFRESH_TOKEN_HASH_KEY);
+    @Override
+    public long validTokenCanRefresh(String token) {
+        return validToken(token, true);
+    }
 
-        if (oldToken != null) {
-            shardedJedis.del(MessageFormat.format(TokenConstant.TOKEN_KEY, oldToken));
-            shardedJedis.hdel(userKey, TokenConstant.USER_TOKEN_HASH_KEY);
-        }
-        if (oldRefreshToken != null) {
-            shardedJedis.del(MessageFormat.format(TokenConstant.REFRESH_TOKEN_KEY, oldRefreshToken));
-            shardedJedis.hdel(userKey, TokenConstant.USER_REFRESH_TOKEN_HASH_KEY);
+    /**
+     * 校验token
+     */
+    private long validToken(String token, boolean refresh) {
+        try {
+            Claims claims = Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
+            long userId = Long.parseLong(claims.getSubject());
+            ShardedJedis shardedJedis = shardedJedisPool.getResource();
+            String userKey = MessageFormat.format(TokenConstant.USER_KEY, userId);
+
+            //token与当前用户token不一致
+            if (!token.equals(shardedJedis.hget(userKey, TokenConstant.USER_TOKEN_HASH_KEY))) {
+                shardedJedis.close();
+                //该token失效，存在重复登录
+                return UserConstant.UN_LOGIN;
+            }
+            shardedJedis.close();
+
+            Date now = new Date();
+            Date expire;
+            if (!refresh) {
+                //token过期时间
+                expire = claims.getExpiration();
+            } else {
+                //token刷新过期时间
+                expire = new Date((long) claims.get("ref"));
+            }
+
+            //jwt签发时间早于现在以及过期时间晚于现在，token有效
+            if (claims.getIssuedAt().before(now) && expire.after(now)) {
+                //返回用户ID
+                return userId;
+            }
+
+            return UserConstant.UN_LOGIN;
+        } catch (Exception e) {
+            logger.debug(e.getMessage(), e);
+            return UserConstant.UN_LOGIN;
         }
     }
 
-
     /**
-     * 生成随机数
+     * 生成Jwt
      */
-    private String generateValue() {
-        return UUID.randomUUID().toString().replace("-", "");
+    private String genJwt(long userId) {
+        Date now = new Date();
+
+        return Jwts.builder()
+                .setSubject(String.valueOf(userId))
+                .setIssuedAt(now)
+                .setExpiration(new Date(now.getTime() + EXPIRE))
+                .claim("ref", new Date(now.getTime() + REFRESH_EXPIRE))
+                .signWith(SignatureAlgorithm.HS512, secret)
+                .compact();
     }
 }

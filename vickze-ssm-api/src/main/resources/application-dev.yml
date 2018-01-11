@@ -1,10 +1,13 @@
-# Tomcat
+#Jetty
 server:
-    tomcat:
-        uri-encoding: UTF-8
-        max-threads: 1000
-        min-spare-threads: 30
     port: 8001
+    jetty:
+        max-threads: 1000
+        min-threads: 30
+#    tomcat:
+#        uri-encoding: UTF-8
+#        max-threads: 1000
+#        min-spare-threads: 30
 
 spring:
     http:

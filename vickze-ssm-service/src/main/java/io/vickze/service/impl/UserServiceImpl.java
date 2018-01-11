@@ -11,9 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.text.MessageFormat;
 
 import io.vickze.constant.TokenConstant;
+import io.vickze.constant.UserConstant;
 import io.vickze.dao.BaseDao;
 import io.vickze.dao.UserDao;
-import io.vickze.entity.RefreshTokenDO;
 import io.vickze.entity.ResultDO;
 import io.vickze.entity.TokenDO;
 import io.vickze.entity.UpdatePasswordDO;
@@ -95,18 +95,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public TokenDO refreshToken(RefreshTokenDO refreshTokenDO) {
-        ShardedJedis shardedJedis = shardedJedisPool.getResource();
-        String refreshTokenKey = MessageFormat.format(TokenConstant.REFRESH_TOKEN_KEY, refreshTokenDO.getRefreshToken());
-
-        String json = shardedJedis.get(refreshTokenKey);
-        shardedJedis.close();
-
-        if (json == null) {
+    public TokenDO refreshToken(String token) {
+        long userId = tokenService.validTokenCanRefresh(token);
+        if (userId == UserConstant.UN_LOGIN) {
             throw new CheckException("登录凭据已失效，请重新登录");
         }
 
-        return tokenService.generateToken(Long.valueOf(json));
+        return tokenService.generateToken(userId);
     }
 
 }

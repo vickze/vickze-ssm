@@ -2,12 +2,14 @@ package io.vickze.controller;
 
 import com.alibaba.dubbo.config.annotation.Reference;
 
+import org.hibernate.validator.constraints.NotBlank;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -63,8 +65,8 @@ public class ApiUserController {
         return userService.updatePassword(userDO, updatePasswordDO);
     }
 
-    @PostMapping("/refresh_token")
-    public TokenDO refreshToken(@RequestBody RefreshTokenDO refreshTokenDO) {
-        return userService.refreshToken(refreshTokenDO);
+    @GetMapping("/refresh_token")
+    public TokenDO refreshToken(@Validated @NotBlank @RequestHeader(value = "Authorization", defaultValue = "") String token) {
+        return userService.refreshToken(token);
     }
 }

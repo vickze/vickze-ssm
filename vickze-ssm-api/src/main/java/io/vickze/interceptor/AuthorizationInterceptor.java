@@ -3,7 +3,6 @@ package io.vickze.interceptor;
 import com.alibaba.dubbo.config.annotation.Reference;
 
 import org.apache.commons.lang.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
@@ -39,16 +38,13 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
             return true;
         }
 
-        String token = request.getHeader("token");
-        if (StringUtils.isBlank(token)) {
-            token = request.getParameter("token");
-        }
+        String token = request.getHeader("Authorization");
 
         if (StringUtils.isBlank(token)) {
             throw new CheckException("用户未授权", HttpStatus.UNAUTHORIZED.value());
         }
 
-        long userId = tokenService.getUserIdByToken(token);
+        long userId = tokenService.validToken(token);
         if (userId == UserConstant.UN_LOGIN) {
             throw new CheckException("用户未授权", HttpStatus.UNAUTHORIZED.value());
         }
