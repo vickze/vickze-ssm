@@ -1,6 +1,6 @@
 package io.vickze.service.impl;
 
-import com.alibaba.dubbo.config.annotation.Service;
+
 
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.shiro.crypto.hash.Sha256Hash;
@@ -8,9 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.text.MessageFormat;
-
-import io.vickze.constant.TokenConstant;
 import io.vickze.constant.UserConstant;
 import io.vickze.dao.BaseDao;
 import io.vickze.dao.UserDao;
@@ -21,7 +18,6 @@ import io.vickze.entity.UserDO;
 import io.vickze.exception.CheckException;
 import io.vickze.service.TokenService;
 import io.vickze.service.UserService;
-import redis.clients.jedis.ShardedJedis;
 import redis.clients.jedis.ShardedJedisPool;
 
 /**
@@ -29,7 +25,6 @@ import redis.clients.jedis.ShardedJedisPool;
  * @email zyk@yk95.top
  * @date 2017-12-12 15:42
  */
-@Service(interfaceClass = UserService.class, timeout = 5000)
 public class UserServiceImpl implements UserService {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -63,6 +58,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public TokenDO login(UserDO userDO) {
+        try {
+            Thread.sleep(1500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         UserDO dbUser = userDao.getByMobile(userDO.getMobile());
         if (dbUser == null) {
             throw new CheckException("手机号未注册");
@@ -104,4 +104,8 @@ public class UserServiceImpl implements UserService {
         return tokenService.generateToken(userId);
     }
 
+    @Override
+    public UserDO get(Long id) {
+        return getBaseDao().get(id);
+    }
 }

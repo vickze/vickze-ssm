@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
+
+    <dubbo:application name="provider" logger="slf4j"/>
+    <dubbo:registry address="zookeeper://127.0.0.1:2181"/>
+    <dubbo:service interface="io.vickze.service.UserService" ref="userService">
+        <dubbo:method name="login" retries="0" />
+    </dubbo:service>
+    <dubbo:service interface="io.vickze.service.TokenService" ref="tokenService" />
+
+    <bean id="userService" class="io.vickze.service.impl.UserServiceImpl"/>
+    <bean id="tokenService" class="io.vickze.service.impl.TokenServiceImpl"/>
+</beans>

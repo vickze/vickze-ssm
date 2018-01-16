@@ -19,20 +19,5 @@ spring:
     resources:
         static-locations: classpath:/static/
 
-    dubbo:
-        application:
-            name: vickze-ssm-api
-        registry:
-            address: zookeeper://127.0.0.1:2181
-            protocol: zookeeper
-            group: spring
-            timeout: 5000
-        protocol:
-            name: dubbo
-            port: 20880
-        scan: io.vickze
-        consumer:
-            timeout: 5000
-            check: true
 
 
