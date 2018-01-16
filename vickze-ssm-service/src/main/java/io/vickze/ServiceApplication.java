@@ -15,7 +15,6 @@ import java.io.IOException;
  * @date 2017-12-28 18:12
  */
 @SpringBootApplication
-@ImportResource("classpath:dubbo-${spring.profiles.active}.xml")
 public class ServiceApplication {
 
     public static void main(String[] args) {
@@ -26,6 +25,4 @@ public class ServiceApplication {
             e.printStackTrace();
         }
     }
-
-
 }

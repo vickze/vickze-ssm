@@ -12,7 +12,6 @@ import org.springframework.context.annotation.ImportResource;
  * @date 2017-12-07 16:03
  */
 @SpringBootApplication
-@ImportResource("classpath:dubbo-${spring.profiles.active}.xml")
 public class ApiApplication extends SpringBootServletInitializer {
 
     public static void main(String[] args) {

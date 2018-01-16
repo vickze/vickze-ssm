@@ -17,6 +17,16 @@ spring:
         poolPreparedStatements: true
         maxPoolPreparedStatementPerConnectionSize: 20
 
+    dubbo:
+        application:
+            name: vickze-ssm-service
+        registry:
+            address: zookeeper://127.0.0.1:2181
+        protocol:
+            name: dubbo
+            port: 20880
+        scan: io.vickze.service
+
     redis:
         open: false  # 是否开启redis缓存  true开启   false关闭
         database: 0

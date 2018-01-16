@@ -25,15 +25,6 @@ spring:
             name: vickze-ssm-api
         registry:
             address: zookeeper://192.168.244.131:2181
-            protocol: zookeeper
-            group: spring
-            timeout: 5000
-        protocol:
-            name: dubbo
-            port: 20880
         scan: io.vickze
-        consumer:
-            timeout: 5000
-            check: true
 
 

@@ -28,6 +28,7 @@ import redis.clients.jedis.ShardedJedisPool;
  * @email zyk@yk95.top
  * @date 2017-12-12 15:32
  */
+@Service(interfaceClass = TokenService.class, timeout = 5000)
 public class TokenServiceImpl implements TokenService {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
