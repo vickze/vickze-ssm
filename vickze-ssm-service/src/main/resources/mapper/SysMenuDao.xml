@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.vickze.dao.SysMenuDao">
+	<select id="get" resultType="io.vickze.entity.SysMenuDO">
+		select * from sys_menu where id = #{value}
+	</select>
+
+	<select id="list" resultType="io.vickze.entity.SysMenuDO">
+		select m.*,(select p.name from sys_menu p where p.id = m.parent_id) as parentName
+		from sys_menu m
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by m.${sidx} ${order}
+            </when>
+			<otherwise>
+                order by m.order_num asc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="count" resultType="long">
+		select count(*) from sys_menu 
+	</select>
+	 
+	<insert id="save" parameterType="io.vickze.entity.SysMenuDO" useGeneratedKeys="true" keyProperty="id">
+		insert into sys_menu
+		(
+			`parent_id`, 
+			`name`, 
+			`url`, 
+			`perms`, 
+			`type`, 
+			`icon`, 
+			`order_num`,
+			`create_time`,
+			`last_modified_time`
+		)
+		values
+		(
+			#{parentId}, 
+			#{name}, 
+			#{url}, 
+			#{perms}, 
+			#{type}, 
+			#{icon}, 
+			#{orderNum},
+			#{createTime},
+			#{lastModifiedTime}
+		)
+	</insert>
+	 
+	<update id="update" parameterType="io.vickze.entity.SysMenuDO">
+		update sys_menu 
+		<set>
+			<if test="parentId != null">`parent_id` = #{parentId}, </if>
+			<if test="name != null">`name` = #{name}, </if>
+			<if test="url != null">`url` = #{url}, </if>
+			<if test="perms != null">`perms` = #{perms}, </if>
+			<if test="type != null">`type` = #{type}, </if>
+			<if test="icon != null">`icon` = #{icon}, </if>
+			<if test="orderNum != null">`order_num` = #{orderNum}, </if>
+			`last_modified_time` = #{lastModifiedTime}
+		</set>
+		where id = #{id}
+	</update>
+	
+	<delete id="delete">
+		delete from sys_menu where id = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from sys_menu where id in
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+
+	<select id="listByParentId" resultType="io.vickze.entity.SysMenuDO">
+		select * from sys_menu where parent_id = #{parentId} order by order_num asc
+	</select>
+
+	<select id="listNotButton" resultType="io.vickze.entity.SysMenuDO">
+		select * from sys_menu where type != 2 order by order_num asc
+	</select>
+</mapper>

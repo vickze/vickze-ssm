@@ -33,7 +33,7 @@ import io.vickze.validator.Register;
 @RestController
 @RequestMapping("/api/user")
 public class ApiUserController {
-    @Reference(retries = 0, timeout = 5000)
+    @Reference
     private UserService userService;
 
     @PostMapping("/register")

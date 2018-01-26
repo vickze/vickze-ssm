@@ -19,10 +19,11 @@ public class ServiceApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(ServiceApplication.class, args);
-        try {
+        //dubbo xml配置启动需要这段代码
+        /*try {
             System.in.read();
         } catch (IOException e) {
             e.printStackTrace();
-        }
+        }*/
     }
 }

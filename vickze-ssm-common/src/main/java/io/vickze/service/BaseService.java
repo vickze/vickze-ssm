@@ -13,45 +13,23 @@ import io.vickze.dao.BaseDao;
  */
 public interface BaseService<ID extends Serializable, T> {
 
-    BaseDao<ID, T> getBaseDao();
+    void save(T t);
 
-    default void save(T t) {
-        getBaseDao().save(t);
-    }
+    void saveBatch(List<T> list);
 
-    default void saveBatch(List<T> list) {
-        getBaseDao().saveBatch(list);
-    }
+    void update(T t);
 
-    default void update(T t) {
-        getBaseDao().update(t);
-    }
+    void delete(ID id);
 
-    default void delete(ID id) {
-        getBaseDao().delete(id);
-    }
+    void deleteBatch(ID[] id);
 
-    default void deleteBatch(ID[] id) {
-        getBaseDao().deleteBatch(id);
-    }
+    T get(ID id);
 
-    default T get(ID id) {
-        return getBaseDao().get(id);
-    }
+    List<T> list(Map<String, Object> map);
 
-    default List<T> list(Map<String, Object> map) {
-        return getBaseDao().list(map);
-    }
+    List<T> list();
 
-    default List<T> list() {
-        return getBaseDao().list();
-    }
+    long count(Map<String, Object> map);
 
-    default long count(Map<String, Object> map) {
-        return getBaseDao().count(map);
-    }
-
-    default long count() {
-        return getBaseDao().count();
-    }
+    long count();
 }

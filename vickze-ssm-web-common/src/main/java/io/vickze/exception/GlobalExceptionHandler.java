@@ -31,11 +31,13 @@ public class GlobalExceptionHandler {
         return ResultDO.error(e.getCode(), e.getMessage());
     }
 
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
     @ExceptionHandler(AuthorizationException.class)
     public ResultDO handleAuthorizationException(AuthorizationException e) {
-        return ResultDO.error("没有权限，请联系管理员授权");
+        return ResultDO.error(HttpStatus.UNAUTHORIZED.value(), "没有权限，请联系管理员授权");
     }
 
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResultDO handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
         return ResultDO.error(e.getBindingResult().getFieldError().getDefaultMessage());
@@ -48,6 +50,7 @@ public class GlobalExceptionHandler {
         return ResultDO.error(HttpStatus.NOT_FOUND.value(), e.getMessage());
     }
 
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(Exception.class)
     public ResultDO handleException(Exception e) {
         logger.error(e.getMessage(), e);

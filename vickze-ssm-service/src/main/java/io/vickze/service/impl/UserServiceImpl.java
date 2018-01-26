@@ -10,10 +10,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Date;
+
 import io.vickze.constant.UserConstant;
 import io.vickze.dao.BaseDao;
 import io.vickze.dao.UserDao;
 import io.vickze.entity.ResultDO;
+import io.vickze.entity.SysMenuDO;
 import io.vickze.entity.TokenDO;
 import io.vickze.entity.UpdatePasswordDO;
 import io.vickze.entity.UserDO;
@@ -28,7 +31,7 @@ import redis.clients.jedis.ShardedJedisPool;
  * @date 2017-12-12 15:42
  */
 @Service(interfaceClass = UserService.class, timeout = 5000)
-public class UserServiceImpl implements UserService {
+public class UserServiceImpl extends BaseServiceImpl<Long, UserDO> implements UserService {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
@@ -41,7 +44,7 @@ public class UserServiceImpl implements UserService {
     private TokenService tokenService;
 
     @Override
-    public BaseDao<Long, UserDO> getBaseDao() {
+    protected BaseDao<Long, UserDO> getBaseDao() {
         return userDao;
     }
 
@@ -55,7 +58,10 @@ public class UserServiceImpl implements UserService {
         userDO.setPassword(new Sha256Hash(userDO.getPassword(), salt).toHex());
         userDO.setSalt(salt);
 
-        save(userDO);
+        Date now = new Date();
+        userDO.setCreateTime(now);
+        userDO.setLastModifiedTime(now);
+        userDao.save(userDO);
         return tokenService.generateToken(userDO.getId());
     }
 

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.vickze.dao.SysRoleMenuDao">
+    <insert id="save" parameterType="io.vickze.entity.SysRoleMenuDO" useGeneratedKeys="true" keyProperty="id">
+        insert into sys_role_menu
+        (
+        `role_id`,
+        `menu_id`,
+        `create_time`,
+        `last_modified_time`
+        )
+        values
+        <foreach collection="menuIdList" item="item" index="index" separator="," >
+            (
+            #{roleId},
+            #{item},
+            #{createTime},
+            #{lastModifiedTime}
+            )
+        </foreach>
+    </insert>
+
+    <delete id="deleteByRoleId">
+        delete from sys_role_menu where role_id = #{value}
+    </delete>
+
+    <select id="listByRoleId" resultType="long">
+        select menu_id from sys_role_menu where role_id = #{value}
+    </select>
+
+</mapper>

@@ -1,0 +1,14 @@
+spring:
+    # 环境 dev|doc|pro
+    profiles:
+        active: dev
+    # jackson时间格式化
+    jackson:
+        time-zone: GMT+8
+        date-format: yyyy-MM-dd HH:mm:ss
+
+# 日志配置
+logging:
+  config: classpath:logback-spring.xml
+  file: ./log/background.log
+

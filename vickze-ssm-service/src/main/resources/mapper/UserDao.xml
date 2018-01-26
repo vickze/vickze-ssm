@@ -40,10 +40,9 @@
 		(
 			#{nickname}, 
 			#{password}, 
-			#{salt}, 
-			#{mobile}, 
-			now(),
-			now()
+			#{salt},
+			#{createTime},
+			#{lastModifiedTime}
 		)
 	</insert>
 	 
@@ -54,8 +53,7 @@
 			<if test="password != null">`password` = #{password}, </if>
 			<if test="salt != null">`salt` = #{salt}, </if>
 			<if test="mobile != null">`mobile` = #{mobile}, </if>
-			<if test="createTime != null">`create_time` = #{createTime},</if>
-			`last_modified_time` = now()
+			`last_modified_time` = #{lastModifiedTime}
 		</set>
 		where id = #{id}
 	</update>
@@ -76,7 +74,7 @@
 	</select>
 
 	<update id="updatePassword">
-		update t_user set `password` = #{newPassword}, `last_modified_time` = now()
+		update t_user set `password` = #{newPassword}, `last_modified_time` = #{lastModifiedTime}
 		where id = #{userId} and password = #{oldPassword}
 	</update>
 </mapper>

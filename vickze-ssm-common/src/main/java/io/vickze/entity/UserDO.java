@@ -34,9 +34,9 @@ public class UserDO implements Serializable {
 
     @Phone(groups = {Register.class, Login.class})
     private String mobile;
-
+    //创建时间
     private Date createTime;
-
+    //最后修改时间
     private Date lastModifiedTime;
 
     public long getId() {

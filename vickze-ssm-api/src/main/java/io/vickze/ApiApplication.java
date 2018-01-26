@@ -12,15 +12,10 @@ import org.springframework.context.annotation.ImportResource;
  * @date 2017-12-07 16:03
  */
 @SpringBootApplication
-public class ApiApplication extends SpringBootServletInitializer {
+public class ApiApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(ApiApplication.class, args);
-    }
-
-    @Override
-    protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
-        return application.sources(ApiApplication.class);
     }
 }
 

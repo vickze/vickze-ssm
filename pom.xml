@@ -13,6 +13,7 @@
         <module>vickze-ssm-common</module>
         <module>vickze-ssm-web-common</module>
         <module>vickze-ssm-service</module>
+        <module>vickze-ssm-background</module>
     </modules>
 
     <parent>
