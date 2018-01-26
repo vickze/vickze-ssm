@@ -33,16 +33,17 @@
 			`password`, 
 			`salt`, 
 			`mobile`, 
-			`create_time`,
-			`last_modified_time`
+			`gmt_create`,
+			`gmt_modified`
 		)
 		values
 		(
 			#{nickname}, 
 			#{password}, 
 			#{salt},
-			#{createTime},
-			#{lastModifiedTime}
+			#{mobile},
+			#{gmtCreate},
+			#{gmtModified}
 		)
 	</insert>
 	 
@@ -53,7 +54,7 @@
 			<if test="password != null">`password` = #{password}, </if>
 			<if test="salt != null">`salt` = #{salt}, </if>
 			<if test="mobile != null">`mobile` = #{mobile}, </if>
-			`last_modified_time` = #{lastModifiedTime}
+			`gmt_modified` = #{gmtModified}
 		</set>
 		where id = #{id}
 	</update>
@@ -74,7 +75,7 @@
 	</select>
 
 	<update id="updatePassword">
-		update t_user set `password` = #{newPassword}, `last_modified_time` = #{lastModifiedTime}
+		update t_user set `password` = #{newPassword}, `gmt_modified` = now()
 		where id = #{userId} and password = #{oldPassword}
 	</update>
 </mapper>

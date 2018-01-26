@@ -5,8 +5,8 @@ CREATE TABLE `t_user` (
   `password` varchar(100) COMMENT '密码',
   `salt` varchar(20) COMMENT '盐',
   `mobile` varchar(100) COMMENT '手机号',
-  `create_time` datetime COMMENT '创建时间',
-  `last_modified_time` datetime COMMENT '最后修改时间',
+  `gmt_create` datetime COMMENT '创建时间',
+  `gmt_modified` datetime COMMENT '最后修改时间',
   PRIMARY KEY (`id`),
   UNIQUE INDEX (`mobile`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户';

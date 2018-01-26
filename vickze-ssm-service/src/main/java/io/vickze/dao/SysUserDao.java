@@ -11,7 +11,7 @@ import io.vickze.entity.SysUserDO;
  * 系统用户
  * 
  * @author vick.zeng
- * @email 2512522383@qq.com
+ * @email zyk@yk95.top
  * @create 2017-09-09 23:50:34
  */
 @Mapper

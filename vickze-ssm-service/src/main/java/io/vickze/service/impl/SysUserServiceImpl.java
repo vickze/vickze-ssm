@@ -60,7 +60,10 @@ public class SysUserServiceImpl extends BaseServiceImpl<Long, SysUserDO> impleme
     @Override
     @Transactional
     public void save(SysUserDO sysUserDO) {
-        sysUserDO.setCreateTime(new Date());
+        Date now = new Date();
+        sysUserDO.setGmtCreate(now);
+        sysUserDO.setGmtModified(now);
+
         //sha256加密
         String salt = RandomStringUtils.randomAlphanumeric(20);
         sysUserDO.setPassword(new Sha256Hash(sysUserDO.getPassword(), salt).toHex());
@@ -73,6 +76,8 @@ public class SysUserServiceImpl extends BaseServiceImpl<Long, SysUserDO> impleme
     @Override
     @Transactional
     public void update(SysUserDO sysUserDO) {
+        Date now = new Date();
+        sysUserDO.setGmtModified(now);
         sysUserDao.update(sysUserDO);
 
         sysUserRoleService.saveOrUpdate(sysUserDO.getId(), sysUserDO.getRoleIdList());

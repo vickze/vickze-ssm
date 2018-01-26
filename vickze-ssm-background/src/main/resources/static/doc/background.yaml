@@ -1069,7 +1069,7 @@ definitions:
         description: 创建者ID
         type: integer
         format: int64
-      createTime:
+      gmtCreate:
         description: 创建时间
         type: string
         format: date-time
@@ -1175,7 +1175,7 @@ definitions:
         description: 创建者ID
         type: integer
         format: int64
-      createTime:
+      gmtCreate:
         description: 创建时间
         type: string
         format: date-time
@@ -1297,7 +1297,7 @@ definitions:
       ip:
         description: IP地址
         type: string
-      createTime:
+      gmtCreate:
         description: 创建时间
         type: string
         format: date-time
@@ -1327,7 +1327,7 @@ definitions:
       url:
         description: URL地址
         type: string
-      createTime:
+      gmtCreate:
         description: 创建时间
         type: string
         format: date-time
@@ -1418,7 +1418,7 @@ definitions:
       remark:
         description: 备注
         type: string
-      createTime:
+      gmtCreate:
         description: 创建时间
         type: string
         format: date-time

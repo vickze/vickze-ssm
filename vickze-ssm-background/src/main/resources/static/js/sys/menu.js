@@ -149,7 +149,9 @@ Menu.initColumn = function () {
         }},
         {title: '排序号', field: 'orderNum', align: 'center', valign: 'middle', sortable: true, width: '100px'},
         {title: '菜单URL', field: 'url', align: 'center', valign: 'middle', sortable: true, width: '160px'},
-        {title: '授权标识', field: 'perms', align: 'center', valign: 'middle', sortable: true}]
+        {title: '授权标识', field: 'perms', align: 'center', valign: 'middle', sortable: true},
+        {title: '创建时间', field: 'gmtCreate', align: 'center', valign: 'middle', sortable: true},
+        {title: '最后修改时间', field: 'gmtModified', align: 'center', valign: 'middle', sortable: true}]
     return columns;
 };
 

@@ -35,8 +35,8 @@
 			`email`, 
 			`mobile`, 
 			`status`,
-			`create_time`
-			`last_modified_time`
+			`gmt_create`,
+			`gmt_modified`
 		)
 		values
 		(
@@ -46,8 +46,8 @@
 			#{email}, 
 			#{mobile}, 
 			#{status},
-			#{createTime},
-			#{lastModifiedTime}
+			#{gmtCreate},
+			#{gmtModified}
 		)
 	</insert>
 	 
@@ -58,7 +58,7 @@
 			<if test="email != null">`email` = #{email}, </if>
 			<if test="mobile != null">`mobile` = #{mobile}, </if>
 			<if test="status != null">`status` = #{status}, </if>
-			`last_modified_time` = #{lastModifiedTime}
+			`gmt_modified` = #{gmtModified}
 		</set>
 		where id = #{id}
 	</update>
@@ -94,7 +94,7 @@
 	</select>
 
 	<update id="updatePassword" parameterType="map">
-		update sys_user set `password` = #{newPassword}, `last_modified_time` = #{lastModifiedTime}
+		update sys_user set `password` = #{newPassword}, `gmt_modified` = now()
 		where id = #{userId} and password = #{password}
 	</update>
 </mapper>

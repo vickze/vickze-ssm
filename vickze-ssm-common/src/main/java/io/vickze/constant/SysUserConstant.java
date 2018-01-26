@@ -4,7 +4,7 @@ package io.vickze.constant;
  * 系统用户常量类
  *
  * @author vick.zeng
- * @email 2512522383@qq.com
+ * @email zyk@yk95.top
  * @create 2017-09-10 0:10
  **/
 public class SysUserConstant {

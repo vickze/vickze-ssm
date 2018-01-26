@@ -17,10 +17,9 @@ import io.vickze.validator.Register;
  * @email zyk@yk95.top
  * @date 2017-12-12 15:24
  */
-public class UserDO implements Serializable {
+public class UserDO extends BaseDO<Long> implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    private long id;
 
     @NotBlank(message = "昵称不能为空", groups = {Register.class})
     private String nickname;
@@ -34,18 +33,7 @@ public class UserDO implements Serializable {
 
     @Phone(groups = {Register.class, Login.class})
     private String mobile;
-    //创建时间
-    private Date createTime;
-    //最后修改时间
-    private Date lastModifiedTime;
 
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
 
     public String getNickname() {
         return nickname;
@@ -71,27 +59,11 @@ public class UserDO implements Serializable {
         this.mobile = mobile;
     }
 
-    public Date getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(Date createTime) {
-        this.createTime = createTime;
-    }
-
     public String getSalt() {
         return salt;
     }
 
     public void setSalt(String salt) {
         this.salt = salt;
-    }
-
-    public Date getLastModifiedTime() {
-        return lastModifiedTime;
-    }
-
-    public void setLastModifiedTime(Date lastModifiedTime) {
-        this.lastModifiedTime = lastModifiedTime;
     }
 }

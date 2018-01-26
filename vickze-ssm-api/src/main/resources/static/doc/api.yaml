@@ -193,10 +193,10 @@ definitions:
         mobile:
           description: 用户手机号
           type: string
-        createTime:
+        gmtCreate:
           description: 创建时间
           type: string
-        lastModifiedTime:
+        gmtModified:
           description: 最后修改时间
           type: string
   UpdatePasswordDO:

@@ -7,16 +7,16 @@
         (
         `role_id`,
         `menu_id`,
-        `create_time`,
-        `last_modified_time`
+        `gmt_create`,
+        `gmt_modified`
         )
         values
         <foreach collection="menuIdList" item="item" index="index" separator="," >
             (
             #{roleId},
             #{item},
-            #{createTime},
-            #{lastModifiedTime}
+            #{gmtCreate},
+            #{gmtModified}
             )
         </foreach>
     </insert>

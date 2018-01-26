@@ -53,14 +53,14 @@ public class UserServiceImpl extends BaseServiceImpl<Long, UserDO> implements Us
         if (userDao.getByMobile(userDO.getMobile()) != null) {
             throw new CheckException("该手机号已被注册");
         }
+
+        Date now = new Date();
+        userDO.setGmtCreate(now);
+        userDO.setGmtModified(now);
         //sha256加密
         String salt = RandomStringUtils.randomAlphanumeric(20);
         userDO.setPassword(new Sha256Hash(userDO.getPassword(), salt).toHex());
         userDO.setSalt(salt);
-
-        Date now = new Date();
-        userDO.setCreateTime(now);
-        userDO.setLastModifiedTime(now);
         userDao.save(userDO);
         return tokenService.generateToken(userDO.getId());
     }

@@ -12,7 +12,8 @@ $(function () {
 					'<span class="label label-danger">禁用</span>' : 
 					'<span class="label label-success">正常</span>';
 			}},				
-			{ label: '创建时间', name: 'createTime', index: 'create_time', width: 80 }			
+			{ label: '创建时间', name: 'gmtCreate', index: 'gmt_create', width: 80 },
+            { label: '最后修改时间', name: 'gmtModified', index: 'gmt_modified', width: 80 }
         ],
 		viewrecords: true,
         height: 385,

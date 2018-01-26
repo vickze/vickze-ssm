@@ -6,7 +6,8 @@ $(function () {
 			{ label: '角色ID', name: 'id', index: 'role_id', width: 50, key: true },
 			{ label: '角色名称', name: 'roleName', index: 'role_name', width: 80 }, 			
 			{ label: '备注', name: 'remark', index: 'remark', width: 80 },
-			{ label: '创建时间', name: 'createTime', index: 'create_time', width: 80 }			
+			{ label: '创建时间', name: 'gmtCreate', index: 'gmt_create', width: 80 },
+			{ label: '最后修改时间', name: 'gmtModified', index: 'gmt_modified', width: 80 }
         ],
 		viewrecords: true,
         height: 385,

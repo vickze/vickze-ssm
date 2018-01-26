@@ -45,7 +45,9 @@ public class SysRoleServiceImpl extends BaseServiceImpl<Long, SysRoleDO> impleme
     @Override
     @Transactional
     public void save(SysRoleDO sysRoleDO) {
-        sysRoleDO.setCreateTime(new Date());
+        Date now = new Date();
+        sysRoleDO.setGmtCreate(now);
+        sysRoleDO.setGmtModified(now);
         sysRoleDao.save(sysRoleDO);
 
         //保存角色与菜单关系
@@ -55,6 +57,8 @@ public class SysRoleServiceImpl extends BaseServiceImpl<Long, SysRoleDO> impleme
     @Override
     @Transactional
     public void update(SysRoleDO sysRoleDO) {
+        Date now = new Date();
+        sysRoleDO.setGmtModified(now);
         sysRoleDao.update(sysRoleDO);
 
         //更新角色与菜单关系

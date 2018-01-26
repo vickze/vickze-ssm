@@ -31,15 +31,15 @@
 		(
 			`role_name`, 
 			`remark`, 
-			`create_time`,
-			`last_modified_time`
+			`gmt_create`,
+			`gmt_modified`
 		)
 		values
 		(
 			#{roleName}, 
 			#{remark},
-			#{createTime},
-			#{lastModifiedTime}
+			#{gmtCreate},
+			#{gmtModified}
 		)
 	</insert>
 	 
@@ -48,8 +48,8 @@
 		<set>
 			<if test="roleName != null">`role_name` = #{roleName}, </if>
 			<if test="remark != null">`remark` = #{remark}, </if>
-			<if test="createTime != null">`create_time` = #{createTime}, </if>
-			`last_modified_time` = #{lastModifiedTime}
+			<if test="gmtCreate != null">`gmt_create` = #{gmtCreate}, </if>
+			`gmt_modified` = #{gmtModified}
 		</set>
 		where id = #{id}
 	</update>

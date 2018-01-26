@@ -24,16 +24,16 @@
         (
         `user_id`,
         `role_id`,
-        `create_time`,
-        `last_modified_time`
+        `gmt_create`,
+        `gmt_modified`
         )
         values
         <foreach collection="roleIdList" item="item" index="index" separator=",">
             (
             #{userId},
             #{item},
-            #{createTime},
-            #{lastModifiedTime}
+            #{gmtCreate},
+            #{gmtModified}
             )
         </foreach>
     </insert>

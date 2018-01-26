@@ -13,7 +13,7 @@ import java.util.Properties;
  * 生成验证码配置
  *
  * @author vick.zeng
- * @email 2512522383@qq.com
+ * @email zyk@yk95.top
  * @create 2017-09-08 22:07
  */
 @Configuration
