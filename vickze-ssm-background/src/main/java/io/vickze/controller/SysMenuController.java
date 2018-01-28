@@ -28,9 +28,9 @@ import io.vickze.service.SysUserService;
 @RestController
 @RequestMapping("sys/menu")
 public class SysMenuController extends SysAbstractController {
-    @Reference
+    @Autowired
     private SysMenuService sysMenuService;
-    @Reference
+    @Autowired
     private SysUserService sysUserService;
 
 

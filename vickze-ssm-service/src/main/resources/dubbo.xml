@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
+
+    <dubbo:application name="vickze-ssm-service" logger="slf4j"/>
+    <dubbo:registry address="${dubbo.address}" timeout="${dubbo.timeout}"/>
+
+    <dubbo:service interface="io.vickze.service.UserService" ref="userService" timeout="100000">
+        <dubbo:method name="login" retries="0" />
+    </dubbo:service>
+    <dubbo:service interface="io.vickze.service.TokenService" ref="tokenService" timeout="100000" />
+    <dubbo:service interface="io.vickze.service.SysUserService" ref="sysUserService" timeout="100000" />
+    <dubbo:service interface="io.vickze.service.SysRoleService" ref="sysRoleService" timeout="100000" />
+    <dubbo:service interface="io.vickze.service.SysMenuService" ref="sysMenuService" timeout="100000"/>
+    <dubbo:service interface="io.vickze.service.SysRoleMenuService" ref="sysRoleMenuService" timeout="100000" />
+    <dubbo:service interface="io.vickze.service.SysUserRoleService" ref="sysUserRoleService" timeout="100000" />
+
+    <bean id="userService" class="io.vickze.service.impl.UserServiceImpl"/>
+    <bean id="tokenService" class="io.vickze.service.impl.TokenServiceImpl"/>
+    <bean id="sysUserService" class="io.vickze.service.impl.SysUserServiceImpl"/>
+    <bean id="sysRoleService" class="io.vickze.service.impl.SysRoleServiceImpl"/>
+    <bean id="sysMenuService" class="io.vickze.service.impl.SysMenuServiceImpl"/>
+    <bean id="sysRoleMenuService" class="io.vickze.service.impl.SysRoleMenuServiceImpl"/>
+    <bean id="sysUserRoleService" class="io.vickze.service.impl.SysUserRoleServiceImpl"/>
+</beans>

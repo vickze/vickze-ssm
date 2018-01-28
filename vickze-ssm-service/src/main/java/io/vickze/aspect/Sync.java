@@ -33,5 +33,15 @@ public @interface Sync {
     /**
      * 锁类型 (redis锁、zookeeper锁）
      */
-    Class<? extends Lock> lockType() default RedisLock.class;
+    Class<? extends Lock> lockClass() default RedisLock.class;
+
+    /**
+     *
+     */
+    boolean isBaseDO() default false;
+
+    /**
+     *
+     */
+    int baseDOIndex() default 0;
 }

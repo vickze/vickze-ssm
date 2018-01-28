@@ -15,9 +15,11 @@ public interface BaseDao<ID extends Serializable, T> {
 
     int save(T t);
 
-    void saveBatch(List<T> list);
+    int saveBatch(List<T> list);
 
     int update(T t);
+
+    int updateBatch(List<T> list);
 
     int delete(ID id);
 

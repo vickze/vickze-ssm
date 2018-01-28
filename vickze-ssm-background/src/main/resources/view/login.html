@@ -105,6 +105,13 @@ var vm = new Vue({
 						return;
 					}
                     parent.location.href ='index.html';
+				},
+				error: function(r) {
+				    if (r.hasOwnProperty("code") && r.code != 0) {
+						vm.error = true;
+						vm.errorMsg = r.msg;
+						return;
+					}
 				}
 			});
 		}

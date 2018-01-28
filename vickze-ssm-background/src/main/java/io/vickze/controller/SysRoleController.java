@@ -32,7 +32,7 @@ import io.vickze.service.SysRoleService;
 @RestController
 @RequestMapping("sys/role")
 public class SysRoleController extends SysAbstractController {
-	@Reference
+	@Autowired
 	private SysRoleService sysRoleService;
 	
 	/**

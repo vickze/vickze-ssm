@@ -1,6 +1,6 @@
 $(function () {
     $("#jqGrid").jqGrid({
-        url: '../sys/user/list',
+        url: '../sys/user',
         datatype: "json",
         colModel: [			
 			{ label: '用户ID', name: 'id', index: 'user_id', width: 50, key: true },
@@ -76,9 +76,10 @@ var vm = new Vue({
 			vm.getRoleList();
 		},
 		saveOrUpdate: function (event) {
-			var url = vm.user.id == null ? "../sys/user/save" : "../sys/user/update";
+			var url = vm.user.id == null ? "../sys/user" : "../sys/user";
+			var method = vm.user.id == null ? "POST" : "PUT";
 			$.ajax({
-				type: "POST",
+				type: method,
 			    url: url,
 			    contentType: "application/json",
 			    data: JSON.stringify(vm.user),
@@ -110,7 +111,7 @@ var vm = new Vue({
 			});
 		},
 		getInfo: function(userId){
-			$.get("../sys/user/info/"+userId, function(r){
+			$.get("../sys/user/"+userId, function(r){
                 vm.user = r;
             });
 		},

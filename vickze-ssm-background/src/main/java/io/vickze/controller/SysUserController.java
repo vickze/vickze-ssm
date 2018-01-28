@@ -1,22 +1,14 @@
 package io.vickze.controller;
 
-import com.alibaba.dubbo.config.annotation.Reference;
-
-import org.apache.commons.lang.RandomStringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.crypto.hash.Sha256Hash;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
 
-import io.vickze.constant.SysUserConstant;
 import io.vickze.entity.PageDO;
 import io.vickze.entity.QueryDO;
 import io.vickze.entity.ResultDO;
@@ -33,16 +25,17 @@ import io.vickze.validator.Assert;
  * @create 2017-09-09 23:50:34
  */
 @RestController
-@RequestMapping("sys/user")
+@RequestMapping(value = "sys/user", produces = "application/json")
 public class SysUserController extends SysAbstractController {
-    @Reference
+    @Autowired
     private SysUserService sysUserService;
 
     /**
      * 列表
      */
-    @RequestMapping("/list")
+    @GetMapping
     @RequiresPermissions("sys:user:list")
+    @ResponseBody
     public PageDO list(@RequestParam Map<String, Object> params) {
         //查询列表数据
         QueryDO query = new QueryDO(params);
@@ -57,7 +50,7 @@ public class SysUserController extends SysAbstractController {
     /**
      * 信息
      */
-    @RequestMapping("/info/{userId}")
+    @GetMapping("/{userId}")
     @RequiresPermissions("sys:user:info")
     public SysUserDO info(@PathVariable("userId") Long userId) {
         return sysUserService.get(userId);
@@ -66,7 +59,7 @@ public class SysUserController extends SysAbstractController {
     /**
      * 保存
      */
-    @RequestMapping("/save")
+    @PostMapping
     @RequiresPermissions("sys:user:save")
     public ResultDO save(@RequestBody SysUserDO sysUser) {
         sysUserService.save(sysUser);
@@ -77,7 +70,7 @@ public class SysUserController extends SysAbstractController {
     /**
      * 修改
      */
-    @RequestMapping("/update")
+    @PutMapping
     @RequiresPermissions("sys:user:update")
     public ResultDO update(@RequestBody SysUserDO sysUser) {
         sysUserService.update(sysUser);
@@ -88,9 +81,42 @@ public class SysUserController extends SysAbstractController {
     /**
      * 删除
      */
-    @RequestMapping("/delete")
+    @DeleteMapping("/{userId}")
     @RequiresPermissions("sys:user:delete")
-    public ResultDO delete(@RequestBody Long[] userIds) {
+    public ResultDO delete(@PathVariable("userId") Long userId) {
+        sysUserService.delete(userId);
+
+        return ResultDO.success();
+    }
+
+    /**
+     * 批量保存
+     */
+    @PostMapping("/save")
+    @RequiresPermissions("sys:user:delete")
+    public ResultDO saveBatch(@RequestBody List<SysUserDO> sysUserDOList) {
+        sysUserService.saveBatch(sysUserDOList);
+
+        return ResultDO.success();
+    }
+
+    /**
+     * 批量更新
+     */
+    @PostMapping("/update")
+    @RequiresPermissions("sys:user:delete")
+    public ResultDO updateBatch(@RequestBody List<SysUserDO> sysUserDOList) {
+        sysUserService.updateBatch(sysUserDOList);
+
+        return ResultDO.success();
+    }
+
+    /**
+     * 批量删除
+     */
+    @PostMapping("/delete")
+    @RequiresPermissions("sys:user:delete")
+    public ResultDO deleteBatch(@RequestBody Long[] userIds) {
         sysUserService.deleteBatch(userIds);
 
         return ResultDO.success();
@@ -99,12 +125,15 @@ public class SysUserController extends SysAbstractController {
     /**
      * 获取登录的用户信息
      */
-    @RequestMapping("/info")
+    @GetMapping("/info")
     public SysUserDO info() {
         return sysUserService.get(getUserId());
     }
 
-    @RequestMapping("/password")
+    /**
+     * 修改密码
+     */
+    @PostMapping("/update-password")
     public ResultDO password(String password, String newPassword) {
         Assert.isBlank(password, "原密码不为能空");
         Assert.isBlank(newPassword, "新密码不为能空");
@@ -127,5 +156,4 @@ public class SysUserController extends SysAbstractController {
 
         return ResultDO.success();
     }
-
 }

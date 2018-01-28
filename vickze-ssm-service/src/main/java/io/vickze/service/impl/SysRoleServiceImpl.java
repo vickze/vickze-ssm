@@ -17,7 +17,6 @@ import io.vickze.entity.SysRoleDO;
 import io.vickze.service.SysRoleMenuService;
 import io.vickze.service.SysRoleService;
 
-@Service(interfaceClass = SysRoleService.class, timeout = 5000)
 public class SysRoleServiceImpl extends BaseServiceImpl<Long, SysRoleDO> implements SysRoleService {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 

@@ -13,7 +13,6 @@ import java.util.Map;
 import io.vickze.dao.SysUserRoleDao;
 import io.vickze.service.SysUserRoleService;
 
-@Service(interfaceClass = SysUserRoleService.class, timeout = 5000)
 public class SysUserRoleServiceImpl implements SysUserRoleService {
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 

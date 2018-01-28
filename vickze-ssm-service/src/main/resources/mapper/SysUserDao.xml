@@ -50,6 +50,33 @@
 			#{gmtModified}
 		)
 	</insert>
+
+	<insert id="saveBatch" useGeneratedKeys="true" keyProperty="id">
+		insert into sys_user
+		(
+		`username`,
+		`password`,
+		`salt`,
+		`email`,
+		`mobile`,
+		`status`,
+		`gmt_create`,
+		`gmt_modified`
+		)
+		values
+		<foreach item="item" collection="list" separator="," >
+		(
+		#{item.username},
+		#{item.password},
+		#{item.salt},
+		#{item.email},
+		#{item.mobile},
+		#{item.status},
+		#{item.gmtCreate},
+		#{item.gmtModified}
+		)
+		</foreach>
+	</insert>
 	 
 	<update id="update" parameterType="io.vickze.entity.SysUserDO">
 		update sys_user 
@@ -61,6 +88,20 @@
 			`gmt_modified` = #{gmtModified}
 		</set>
 		where id = #{id}
+	</update>
+
+	<update id="updateBatch">
+		<foreach collection="list" item="item" separator=";">
+		update sys_user
+		<set>
+			<if test="item.username != null">`username` = #{item.username}, </if>
+			<if test="item.email != null">`email` = #{item.email}, </if>
+			<if test="item.mobile != null">`mobile` = #{item.mobile}, </if>
+			<if test="item.status != null">`status` = #{item.status}, </if>
+			`gmt_modified` = #{gmtModified}
+		</set>
+		where id = #{id}
+		</foreach>
 	</update>
 	
 	<delete id="delete">

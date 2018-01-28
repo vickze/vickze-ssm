@@ -1,7 +1,5 @@
 package io.vickze.service.impl;
 
-import com.alibaba.dubbo.config.annotation.Service;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +15,6 @@ import io.vickze.entity.SysMenuDO;
 import io.vickze.service.SysMenuService;
 import io.vickze.service.SysUserService;
 
-@Service(interfaceClass = SysMenuService.class, timeout = 5000)
 public class SysMenuServiceImpl extends BaseServiceImpl<Long, SysMenuDO> implements SysMenuService {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 

@@ -72,7 +72,7 @@ var vm = new Vue({
 					var data = "password="+vm.password+"&newPassword="+vm.newPassword;
 					$.ajax({
 						type: "POST",
-					    url: baseURL + "sys/user/password",
+					    url: baseURL + "sys/user/update-password",
 					    data: data,
 					    dataType: "json",
 					    success: function(r){

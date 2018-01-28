@@ -1,7 +1,5 @@
 package io.vickze.controller;
 
-import com.alibaba.dubbo.config.annotation.Reference;
-
 import org.hibernate.validator.constraints.NotBlank;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -14,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.vickze.constant.UserConstant;
-import io.vickze.entity.RefreshTokenDO;
 import io.vickze.entity.ResultDO;
 import io.vickze.entity.TokenDO;
 import io.vickze.entity.UpdatePasswordDO;
@@ -33,7 +30,7 @@ import io.vickze.validator.Register;
 @RestController
 @RequestMapping("/api/user")
 public class ApiUserController {
-    @Reference
+    @Autowired
     private UserService userService;
 
     @PostMapping("/register")

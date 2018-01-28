@@ -2,9 +2,6 @@ package io.vickze.controller;
 
 import com.google.code.kaptcha.Constants;
 import com.google.code.kaptcha.Producer;
-
-import com.alibaba.dubbo.config.annotation.Reference;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.IncorrectCredentialsException;
@@ -31,7 +28,6 @@ import io.vickze.constant.KaptchaConstant;
 import io.vickze.constant.SysUserConstant;
 import io.vickze.entity.ResultDO;
 import io.vickze.exception.CheckException;
-import io.vickze.service.SysUserService;
 
 /**
  * 登录相关
@@ -44,8 +40,6 @@ import io.vickze.service.SysUserService;
 public class SysIndexController {
     @Autowired
     private Producer producer;
-    @Reference
-    private SysUserService sysUserService;
 
     @RequestMapping("/captcha.jpg")
     public void captcha(HttpServletResponse response) throws ServletException, IOException {

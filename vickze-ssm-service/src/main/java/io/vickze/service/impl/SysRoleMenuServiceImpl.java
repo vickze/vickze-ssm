@@ -13,7 +13,6 @@ import java.util.Map;
 import io.vickze.dao.SysRoleMenuDao;
 import io.vickze.service.SysRoleMenuService;
 
-@Service(interfaceClass = SysRoleMenuService.class, timeout = 5000)
 public class SysRoleMenuServiceImpl implements SysRoleMenuService {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 

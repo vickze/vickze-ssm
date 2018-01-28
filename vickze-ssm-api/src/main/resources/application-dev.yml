@@ -19,11 +19,8 @@ spring:
     resources:
         static-locations: classpath:/static/
 
-    dubbo:
-        application:
-            name: vickze-ssm-api
-        registry:
-            address: zookeeper://127.0.0.1:2181
-        scan: io.vickze
+dubbo:
+  address: zookeeper://127.0.0.1:2181
+  timeout: 5000
 
 

@@ -1,7 +1,5 @@
 package io.vickze.resolver;
 
-import com.alibaba.dubbo.config.annotation.Reference;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
@@ -10,7 +8,6 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
-
 import io.vickze.constant.UserConstant;
 import io.vickze.entity.UserDO;
 import io.vickze.service.UserService;
@@ -22,7 +19,7 @@ import io.vickze.service.UserService;
  */
 @Component
 public class UserHandlerMethodArgumentResolver implements HandlerMethodArgumentResolver {
-    @Reference
+    @Autowired
     private UserService userService;
 
     @Override

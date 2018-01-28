@@ -1,26 +1,18 @@
 package io.vickze.interceptor;
 
-import com.alibaba.dubbo.config.annotation.Reference;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.shiro.SecurityUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
-
-import java.awt.image.BufferedImage;
 import java.io.IOException;
-
-import javax.imageio.ImageIO;
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import io.vickze.constant.UserConstant;
 import io.vickze.entity.ResultDO;
-import io.vickze.exception.CheckException;
 import io.vickze.service.TokenService;
 import io.vickze.util.JsonUtil;
 
@@ -33,7 +25,7 @@ import io.vickze.util.JsonUtil;
  */
 @Component
 public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
-    @Reference
+    @Autowired
     private TokenService tokenService;
 
     @Override

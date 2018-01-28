@@ -2,6 +2,7 @@ package io.vickze.service.impl;
 
 import com.alibaba.dubbo.config.annotation.Service;
 
+import io.vickze.aspect.Sync;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shiro.crypto.hash.Sha256Hash;
@@ -28,7 +29,6 @@ import io.vickze.service.SysMenuService;
 import io.vickze.service.SysUserRoleService;
 import io.vickze.service.SysUserService;
 
-@Service(interfaceClass = SysUserService.class, timeout = 5000)
 public class SysUserServiceImpl extends BaseServiceImpl<Long, SysUserDO> implements SysUserService {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -75,12 +75,46 @@ public class SysUserServiceImpl extends BaseServiceImpl<Long, SysUserDO> impleme
 
     @Override
     @Transactional
+    public void saveBatch(List<SysUserDO> sysUserDOList) {
+        Date now = new Date();
+        for (SysUserDO sysUserDO : sysUserDOList) {
+            sysUserDO.setGmtCreate(now);
+            sysUserDO.setGmtModified(now);
+
+            //sha256加密
+            String salt = RandomStringUtils.randomAlphanumeric(20);
+            sysUserDO.setPassword(new Sha256Hash(sysUserDO.getPassword(), salt).toHex());
+            sysUserDO.setSalt(salt);
+        }
+
+        sysUserDao.saveBatch(sysUserDOList);
+        for (SysUserDO sysUserDO : sysUserDOList) {
+            sysUserRoleService.saveOrUpdate(sysUserDO.getId(), sysUserDO.getRoleIdList());
+        }
+    }
+
+    @Override
+    @Transactional
     public void update(SysUserDO sysUserDO) {
         Date now = new Date();
         sysUserDO.setGmtModified(now);
         sysUserDao.update(sysUserDO);
 
         sysUserRoleService.saveOrUpdate(sysUserDO.getId(), sysUserDO.getRoleIdList());
+    }
+
+    @Override
+    @Transactional
+    public void updateBatch(List<SysUserDO> sysUserDOList) {
+        Date now = new Date();
+        for (SysUserDO sysUserDO : sysUserDOList) {
+            sysUserDO.setGmtModified(now);
+        }
+        sysUserDao.saveBatch(sysUserDOList);
+
+        for (SysUserDO sysUserDO : sysUserDOList) {
+            sysUserRoleService.saveOrUpdate(sysUserDO.getId(), sysUserDO.getRoleIdList());
+        }
     }
 
     @Override
