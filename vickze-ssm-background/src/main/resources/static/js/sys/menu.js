@@ -48,7 +48,7 @@ var vm = new Vue({
                 return ;
             }
 
-            $.get(baseURL + "sys/menu/info/"+menuId, function(r){
+            $.get(baseURL + "sys/menu/"+menuId, function(r){
                     vm.showList = false;
                     vm.title = "修改";
                     vm.menu = r;
@@ -64,9 +64,8 @@ var vm = new Vue({
 
             confirm('确定要删除选中的记录？', function(){
                 $.ajax({
-                    type: "POST",
-                    url: baseURL + "sys/menu/delete",
-                    data: "menuId=" + menuId,
+                    type: "DELETE",
+                    url: baseURL + "sys/menu/" + menuId,
                     success: function(r){
                         alert('操作成功', function(){
                             vm.reload();
@@ -76,10 +75,10 @@ var vm = new Vue({
             });
         },
         saveOrUpdate: function (event) {
-            var url = vm.menu.id == null ? "sys/menu/save" : "sys/menu/update";
+            var method = vm.menu.id == null ? "POST" : "PUT";
             $.ajax({
-                type: "POST",
-                url: baseURL + url,
+                type: method,
+                url: "../sys/menu",
                 contentType: "application/json",
                 data: JSON.stringify(vm.menu),
                 success: function(r){
@@ -169,7 +168,7 @@ function getMenuId () {
 
 $(function () {
     var colunms = Menu.initColumn();
-    var table = new TreeTable(Menu.id, baseURL + "sys/menu/list", colunms);
+    var table = new TreeTable(Menu.id, baseURL + "sys/menu", colunms);
     table.setExpandColumn(2);
     table.setIdField("id");
     table.setCodeField("id");

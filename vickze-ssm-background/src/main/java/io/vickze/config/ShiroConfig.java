@@ -74,23 +74,11 @@ public class ShiroConfig {
         shiroFilter.setSecurityManager(securityManager);
 
         Map<String, String> filterMap = new LinkedHashMap<>();
-        filterMap.put("/sys/generator/**", "anon");
-        filterMap.put("/druid/**", "anon");
-        filterMap.put("/api/**", "anon");
-        filterMap.put("/sys/login", "anon");
-        filterMap.put("/**/*.css", "anon");
-        filterMap.put("/**/*.js", "anon");
-        filterMap.put("/**/*.html", "anon");
-        filterMap.put("/fonts/**", "anon");
-        filterMap.put("/plugins/**", "anon");
-        filterMap.put("/doc/**", "anon");
-        filterMap.put("/favicon.ico", "anon");
-        filterMap.put("/captcha.jpg", "anon");
         filterMap.put("/", "anon");
-        filterMap.put("/**", "user");
+        filterMap.put("/sys/**", "user");
         //filterMap.put("/**", "authc");
 
-        shiroFilter.setLoginUrl("/sys/unauthorized");
+        shiroFilter.setLoginUrl("/unauthorized");
         shiroFilter.setFilterChainDefinitionMap(filterMap);
         return shiroFilter;
     }

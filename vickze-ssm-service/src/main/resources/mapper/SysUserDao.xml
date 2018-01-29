@@ -54,26 +54,26 @@
 	<insert id="saveBatch" useGeneratedKeys="true" keyProperty="id">
 		insert into sys_user
 		(
-		`username`,
-		`password`,
-		`salt`,
-		`email`,
-		`mobile`,
-		`status`,
-		`gmt_create`,
-		`gmt_modified`
+			`username`,
+			`password`,
+			`salt`,
+			`email`,
+			`mobile`,
+			`status`,
+			`gmt_create`,
+			`gmt_modified`
 		)
 		values
 		<foreach item="item" collection="list" separator="," >
 		(
-		#{item.username},
-		#{item.password},
-		#{item.salt},
-		#{item.email},
-		#{item.mobile},
-		#{item.status},
-		#{item.gmtCreate},
-		#{item.gmtModified}
+			#{item.username},
+			#{item.password},
+			#{item.salt},
+			#{item.email},
+			#{item.mobile},
+			#{item.status},
+			#{item.gmtCreate},
+			#{item.gmtModified}
 		)
 		</foreach>
 	</insert>
@@ -91,6 +91,50 @@
 	</update>
 
 	<update id="updateBatch">
+		update sys_user
+		<trim prefix="set" suffixOverrides=",">
+			<trim prefix="`username` = case" suffix="end,">
+				<foreach collection="list" item="item">
+					<if test="item.username != null">
+						when id = #{item.id} then #{item.username}
+					</if>
+				</foreach>
+			</trim>
+			<trim prefix="`email` = case" suffix="end,">
+				<foreach collection="list" item="item">
+					<if test="item.email != null">
+						when id = #{item.id} then #{item.email}
+					</if>
+				</foreach>
+			</trim>
+			<trim prefix="`mobile` = case" suffix="end,">
+				<foreach collection="list" item="item">
+					<if test="item.mobile != null">
+						when id = #{item.id} then #{item.mobile}
+					</if>
+				</foreach>
+			</trim>
+			<trim prefix="`status` = case" suffix="end,">
+				<foreach collection="list" item="item">
+					<if test="item.status != null">
+						when id = #{item.id} then #{item.status}
+					</if>
+				</foreach>
+			</trim>
+			<trim prefix="`gmt_modified` = case" suffix="end,">
+				<foreach collection="list" item="item">
+					when id = #{item.id} then #{item.gmtModified}
+				</foreach>
+			</trim>
+		</trim>
+		where id in
+		<foreach item="item" collection="list" open="(" separator="," close=")">
+			#{item.id}
+		</foreach>
+
+
+		<!--
+		批量更新，效率较上面高，但无法返回正确的更新行数，上面的效率较低，特别是在更新大批量的情况下，在更新大批量的情况下应考虑分批更新
 		<foreach collection="list" item="item" separator=";">
 		update sys_user
 		<set>
@@ -98,10 +142,11 @@
 			<if test="item.email != null">`email` = #{item.email}, </if>
 			<if test="item.mobile != null">`mobile` = #{item.mobile}, </if>
 			<if test="item.status != null">`status` = #{item.status}, </if>
-			`gmt_modified` = #{gmtModified}
+			`gmt_modified` = #{item.gmtModified}
 		</set>
-		where id = #{id}
+		where id = #{item.id}
 		</foreach>
+		-->
 	</update>
 	
 	<delete id="delete">
@@ -135,7 +180,7 @@
 	</select>
 
 	<update id="updatePassword" parameterType="map">
-		update sys_user set `password` = #{newPassword}, `gmt_modified` = now()
+		update sys_user set `password` = #{newPassword}, `gmt_modified` = #{gmtModified}
 		where id = #{userId} and password = #{password}
 	</update>
 </mapper>

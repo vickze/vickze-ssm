@@ -76,11 +76,10 @@ var vm = new Vue({
 			vm.getRoleList();
 		},
 		saveOrUpdate: function (event) {
-			var url = vm.user.id == null ? "../sys/user" : "../sys/user";
 			var method = vm.user.id == null ? "POST" : "PUT";
 			$.ajax({
 				type: method,
-			    url: url,
+			    url: "../sys/user",
 			    contentType: "application/json",
 			    data: JSON.stringify(vm.user),
 			    success: function(r){
@@ -99,7 +98,7 @@ var vm = new Vue({
 			confirm('确定要删除选中的记录？', function(){
 				$.ajax({
 					type: "POST",
-				    url: "../sys/user/delete",
+				    url: "../sys/user/delete-batch",
 				    contentType: "application/json",
 				    data: JSON.stringify(userIds),
 				    success: function(r){

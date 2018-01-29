@@ -22,9 +22,9 @@ public abstract class SysAbstractController {
     protected Logger logger = LoggerFactory.getLogger(getClass());
 
     protected Long getUserId() {
-        String principal = SecurityUtils.getSubject().getPrincipal().toString();
+        Object principal = SecurityUtils.getSubject().getPrincipal();
         if (principal != null) {
-            return Long.valueOf(principal.split(SysUserConstant.USER_SPLIT)[0]);
+            return Long.valueOf(principal.toString().split(SysUserConstant.USER_SPLIT)[0]);
         }
         return -1L;
     }

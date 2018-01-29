@@ -1,6 +1,6 @@
 $(function () {
     $("#jqGrid").jqGrid({
-        url: '../sys/role/list',
+        url: '../sys/role',
         datatype: "json",
         colModel: [			
 			{ label: '角色ID', name: 'id', index: 'role_id', width: 50, key: true },
@@ -91,11 +91,11 @@ var vm = new Vue({
 				menuIdList.push(nodes[i].id);
 			}
 			vm.role.menuIdList = menuIdList;
-			
-			var url = vm.role.id == null ? "../sys/role/save" : "../sys/role/update";
+
+			var method = vm.role.id == null ? "POST" : "PUT";
 			$.ajax({
-				type: "POST",
-			    url: url,
+				type: method,
+			    url: "../sys/role",
 			    contentType: "application/json",
 			    data: JSON.stringify(vm.role),
 			    success: function(r){
@@ -114,7 +114,7 @@ var vm = new Vue({
 			confirm('确定要删除选中的记录？', function(){
 				$.ajax({
 					type: "POST",
-				    url: "../sys/role/delete",
+				    url: "../sys/role/delete-batch",
 				    contentType: "application/json",
 				    data: JSON.stringify(roleIds),
 				    success: function(r){
@@ -126,7 +126,7 @@ var vm = new Vue({
 			});
 		},
 		getInfo: function(roleId){
-			$.get("../sys/role/info/"+roleId, function(r){
+			$.get("../sys/role/"+roleId, function(r){
                 vm.role = r;
                 //勾选角色所拥有的菜单
     			var menuIds = vm.role.menuIdList;
@@ -138,7 +138,7 @@ var vm = new Vue({
 		},
 		getMenuTree: function(roleId) {
 			//加载菜单树
-			$.get(baseURL + "sys/menu/list", function(r){
+			$.get(baseURL + "sys/menu", function(r){
 				menu_ztree = $.fn.zTree.init($("#menuTree"), menu_setting, r);
 				//展开所有节点
 				menu_ztree.expandAll(true);

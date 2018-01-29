@@ -20,7 +20,6 @@ import io.vickze.validator.Register;
 public class UserDO extends BaseDO<Long> implements Serializable {
     private static final long serialVersionUID = 1L;
 
-
     @NotBlank(message = "昵称不能为空", groups = {Register.class})
     private String nickname;
 

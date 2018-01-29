@@ -1,8 +1,13 @@
 package io.vickze.entity;
 
+import org.hibernate.validator.constraints.NotBlank;
+
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
+
+import io.vickze.validator.Save;
+import io.vickze.validator.Update;
 
 
 /**
@@ -16,6 +21,7 @@ public class SysRoleDO extends BaseDO<Long> implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	//角色名称
+	@NotBlank(message = "角色名不能为空", groups = {Save.class, Update.class})
 	private String roleName;
 	//备注
 	private String remark;

@@ -61,7 +61,7 @@ public class SysIndexController {
     /**
      * 登录
      */
-    @RequestMapping(value = "/sys/login", method = RequestMethod.POST)
+    @RequestMapping(value = "/login", method = RequestMethod.POST)
     public ResultDO login(String username, String password, String captcha) throws IOException {
         if (SecurityUtils.getSubject().isAuthenticated()) {
             throw new CheckException(SysUserConstant.IN_LOGIN);
@@ -98,7 +98,7 @@ public class SysIndexController {
         return ResultDO.success();
     }
 
-    @GetMapping("/sys/unauthorized")
+    @GetMapping("/unauthorized")
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ResultDO unauthorized() {
         return ResultDO.error(HttpStatus.UNAUTHORIZED.value(), "没有权限，请联系管理员授权");

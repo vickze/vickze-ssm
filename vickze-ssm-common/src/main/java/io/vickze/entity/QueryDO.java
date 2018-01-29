@@ -13,27 +13,33 @@ import io.vickze.xss.SQLFilter;
  * @create 2017-09-08 22:07
  */
 public class QueryDO extends LinkedHashMap<String, Object> {
-	private static final long serialVersionUID = 1L;
-	//当前页码
+    private static final long serialVersionUID = 1L;
+    //当前页码
     private int page;
     //每页条数
     private int limit;
 
-    public QueryDO(Map<String, Object> params){
+    public QueryDO(Map<String, Object> params) {
         this.putAll(params);
+        Object pageObj = params.get("page");
+        Object limitObj = params.get("limit");
 
         //分页参数
-        this.page = Integer.parseInt(params.get("page").toString());
-        this.limit = Integer.parseInt(params.get("limit").toString());
+        this.page = pageObj == null ? 1 : Integer.parseInt(pageObj.toString());
+        this.limit = limitObj == null ? 10 : Integer.parseInt(limitObj.toString());
         this.put("offset", (page - 1) * limit);
         this.put("page", page);
         this.put("limit", limit);
 
-        //防止SQL注入（因为sidx、order是通过拼接SQL实现排序的，会有SQL注入风险）
-        String sidx = params.get("sidx").toString();
-        String order = params.get("order").toString();
-        this.put("sidx", SQLFilter.sqlInject(sidx));
-        this.put("order", SQLFilter.sqlInject(order));
+        Object sidxObj = params.get("sidx");
+        Object orderObj = params.get("order");
+        if (sidxObj != null && orderObj != null) {
+            //防止SQL注入（因为sidx、order是通过拼接SQL实现排序的，会有SQL注入风险）
+            String sidx = sidxObj.toString();
+            String order = orderObj.toString();
+            this.put("sidx", SQLFilter.sqlInject(sidx));
+            this.put("order", SQLFilter.sqlInject(order));
+        }
     }
 
 

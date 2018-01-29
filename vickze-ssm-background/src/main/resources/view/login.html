@@ -95,13 +95,14 @@ var vm = new Vue({
             var data = "username="+vm.username+"&password="+vm.password+"&captcha="+vm.captcha;
 			$.ajax({
 				type: "POST",
-			    url: baseURL + "sys/login",
+			    url: baseURL + "login",
 			    data: data,
 			    dataType: "json",
 			    success: function(r){
 			        if (r.hasOwnProperty("code") && r.code != 0) {
 						vm.error = true;
 						vm.errorMsg = r.msg;
+						vm.refreshCode();
 						return;
 					}
                     parent.location.href ='index.html';
@@ -110,6 +111,7 @@ var vm = new Vue({
 				    if (r.hasOwnProperty("code") && r.code != 0) {
 						vm.error = true;
 						vm.errorMsg = r.msg;
+						vm.refreshCode();
 						return;
 					}
 				}

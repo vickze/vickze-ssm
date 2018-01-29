@@ -57,12 +57,12 @@ public class ApiUserController {
     }
 
     @Auth
-    @PostMapping("/update_password")
+    @PostMapping("/update-password")
     public ResultDO updatePassword(@User UserDO userDO, @RequestBody @Validated UpdatePasswordDO updatePasswordDO) {
         return userService.updatePassword(userDO, updatePasswordDO);
     }
 
-    @GetMapping("/refresh_token")
+    @GetMapping("/refresh-token")
     public TokenDO refreshToken(@Validated @NotBlank @RequestHeader(value = "Authorization", defaultValue = "") String token) {
         return userService.refreshToken(token);
     }

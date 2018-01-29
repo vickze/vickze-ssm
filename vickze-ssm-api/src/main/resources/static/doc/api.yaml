@@ -93,7 +93,7 @@ paths:
             $ref: '#/definitions/ResultDO'
       security:
         - api_key: []
-  /user/update_password:
+  /user/update-password:
     post:
       tags:
         - 用户相关接口
@@ -114,7 +114,7 @@ paths:
             $ref: '#/definitions/ResultDO'
       security:
         - api_key: []
-  /user/refresh_token:
+  /user/refresh-token:
     get:
       tags:
         - 用户相关接口

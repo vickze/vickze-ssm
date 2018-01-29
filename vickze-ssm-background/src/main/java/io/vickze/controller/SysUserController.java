@@ -4,6 +4,7 @@ import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.crypto.hash.Sha256Hash;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,6 +16,9 @@ import io.vickze.entity.ResultDO;
 import io.vickze.entity.SysUserDO;
 import io.vickze.service.SysUserService;
 import io.vickze.validator.Assert;
+import io.vickze.validator.Save;
+import io.vickze.validator.Update;
+import io.vickze.validator.ValidatorUtil;
 
 
 /**
@@ -61,7 +65,7 @@ public class SysUserController extends SysAbstractController {
      */
     @PostMapping
     @RequiresPermissions("sys:user:save")
-    public ResultDO save(@RequestBody SysUserDO sysUser) {
+    public ResultDO save(@RequestBody @Validated({Save.class}) SysUserDO sysUser) {
         sysUserService.save(sysUser);
 
         return ResultDO.success();
@@ -72,7 +76,7 @@ public class SysUserController extends SysAbstractController {
      */
     @PutMapping
     @RequiresPermissions("sys:user:update")
-    public ResultDO update(@RequestBody SysUserDO sysUser) {
+    public ResultDO update(@RequestBody @Validated({Update.class}) SysUserDO sysUser) {
         sysUserService.update(sysUser);
 
         return ResultDO.success();
@@ -92,9 +96,10 @@ public class SysUserController extends SysAbstractController {
     /**
      * 批量保存
      */
-    @PostMapping("/save")
+    @PostMapping("/save-batch")
     @RequiresPermissions("sys:user:delete")
     public ResultDO saveBatch(@RequestBody List<SysUserDO> sysUserDOList) {
+        ValidatorUtil.validateCollection(sysUserDOList, Save.class);
         sysUserService.saveBatch(sysUserDOList);
 
         return ResultDO.success();
@@ -103,9 +108,10 @@ public class SysUserController extends SysAbstractController {
     /**
      * 批量更新
      */
-    @PostMapping("/update")
+    @PostMapping("/update-batch")
     @RequiresPermissions("sys:user:delete")
     public ResultDO updateBatch(@RequestBody List<SysUserDO> sysUserDOList) {
+        ValidatorUtil.validateCollection(sysUserDOList, Update.class);
         sysUserService.updateBatch(sysUserDOList);
 
         return ResultDO.success();
@@ -114,7 +120,7 @@ public class SysUserController extends SysAbstractController {
     /**
      * 批量删除
      */
-    @PostMapping("/delete")
+    @PostMapping("/delete-batch")
     @RequiresPermissions("sys:user:delete")
     public ResultDO deleteBatch(@RequestBody Long[] userIds) {
         sysUserService.deleteBatch(userIds);

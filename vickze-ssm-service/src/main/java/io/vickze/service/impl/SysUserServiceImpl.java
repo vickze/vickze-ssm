@@ -44,6 +44,9 @@ public class SysUserServiceImpl extends BaseServiceImpl<Long, SysUserDO> impleme
     @Override
     public SysUserDO get(Long userId) {
         SysUserDO sysUserDO = sysUserDao.get(userId);
+        if (sysUserDO == null) {
+            return null;
+        }
 
         //获取用户所属的角色列表
         List<Long> roleIdList = sysUserRoleService.listByUserId(userId);
@@ -60,15 +63,11 @@ public class SysUserServiceImpl extends BaseServiceImpl<Long, SysUserDO> impleme
     @Override
     @Transactional
     public void save(SysUserDO sysUserDO) {
-        Date now = new Date();
-        sysUserDO.setGmtCreate(now);
-        sysUserDO.setGmtModified(now);
-
         //sha256加密
         String salt = RandomStringUtils.randomAlphanumeric(20);
         sysUserDO.setPassword(new Sha256Hash(sysUserDO.getPassword(), salt).toHex());
         sysUserDO.setSalt(salt);
-        sysUserDao.save(sysUserDO);
+        super.save(sysUserDO);
 
         sysUserRoleService.saveOrUpdate(sysUserDO.getId(), sysUserDO.getRoleIdList());
     }
@@ -76,18 +75,14 @@ public class SysUserServiceImpl extends BaseServiceImpl<Long, SysUserDO> impleme
     @Override
     @Transactional
     public void saveBatch(List<SysUserDO> sysUserDOList) {
-        Date now = new Date();
         for (SysUserDO sysUserDO : sysUserDOList) {
-            sysUserDO.setGmtCreate(now);
-            sysUserDO.setGmtModified(now);
-
             //sha256加密
             String salt = RandomStringUtils.randomAlphanumeric(20);
             sysUserDO.setPassword(new Sha256Hash(sysUserDO.getPassword(), salt).toHex());
             sysUserDO.setSalt(salt);
         }
+        super.saveBatch(sysUserDOList);
 
-        sysUserDao.saveBatch(sysUserDOList);
         for (SysUserDO sysUserDO : sysUserDOList) {
             sysUserRoleService.saveOrUpdate(sysUserDO.getId(), sysUserDO.getRoleIdList());
         }
@@ -96,9 +91,7 @@ public class SysUserServiceImpl extends BaseServiceImpl<Long, SysUserDO> impleme
     @Override
     @Transactional
     public void update(SysUserDO sysUserDO) {
-        Date now = new Date();
-        sysUserDO.setGmtModified(now);
-        sysUserDao.update(sysUserDO);
+        super.update(sysUserDO);
 
         sysUserRoleService.saveOrUpdate(sysUserDO.getId(), sysUserDO.getRoleIdList());
     }
@@ -106,11 +99,7 @@ public class SysUserServiceImpl extends BaseServiceImpl<Long, SysUserDO> impleme
     @Override
     @Transactional
     public void updateBatch(List<SysUserDO> sysUserDOList) {
-        Date now = new Date();
-        for (SysUserDO sysUserDO : sysUserDOList) {
-            sysUserDO.setGmtModified(now);
-        }
-        sysUserDao.saveBatch(sysUserDOList);
+        super.updateBatch(sysUserDOList);
 
         for (SysUserDO sysUserDO : sysUserDOList) {
             sysUserRoleService.saveOrUpdate(sysUserDO.getId(), sysUserDO.getRoleIdList());
@@ -158,6 +147,7 @@ public class SysUserServiceImpl extends BaseServiceImpl<Long, SysUserDO> impleme
         map.put("userId", userId);
         map.put("password", password);
         map.put("newPassword", newPassword);
+        map.put("gmtModified", new Date());
         return sysUserDao.updatePassword(map);
     }
 }

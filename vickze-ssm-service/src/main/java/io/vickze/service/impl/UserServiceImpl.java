@@ -2,7 +2,6 @@ package io.vickze.service.impl;
 
 
 
-import com.alibaba.dubbo.config.annotation.Service;
 
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.shiro.crypto.hash.Sha256Hash;
@@ -16,7 +15,6 @@ import io.vickze.constant.UserConstant;
 import io.vickze.dao.BaseDao;
 import io.vickze.dao.UserDao;
 import io.vickze.entity.ResultDO;
-import io.vickze.entity.SysMenuDO;
 import io.vickze.entity.TokenDO;
 import io.vickze.entity.UpdatePasswordDO;
 import io.vickze.entity.UserDO;
@@ -53,14 +51,12 @@ public class UserServiceImpl extends BaseServiceImpl<Long, UserDO> implements Us
             throw new CheckException("该手机号已被注册");
         }
 
-        Date now = new Date();
-        userDO.setGmtCreate(now);
-        userDO.setGmtModified(now);
         //sha256加密
         String salt = RandomStringUtils.randomAlphanumeric(20);
         userDO.setPassword(new Sha256Hash(userDO.getPassword(), salt).toHex());
         userDO.setSalt(salt);
-        userDao.save(userDO);
+        super.save(userDO);
+
         return tokenService.generateToken(userDO.getId());
     }
 
@@ -110,10 +106,5 @@ public class UserServiceImpl extends BaseServiceImpl<Long, UserDO> implements Us
         }
 
         return tokenService.generateToken(userId);
-    }
-
-    @Override
-    public UserDO get(Long id) {
-        return getBaseDao().get(id);
     }
 }

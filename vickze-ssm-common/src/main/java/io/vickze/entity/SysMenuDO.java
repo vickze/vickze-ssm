@@ -1,8 +1,17 @@
 package io.vickze.entity;
 
+import org.hibernate.validator.constraints.NotBlank;
+import org.hibernate.validator.constraints.Range;
+
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
+
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+
+import io.vickze.validator.Save;
+import io.vickze.validator.Update;
 
 
 /**
@@ -16,16 +25,20 @@ public class SysMenuDO extends BaseDO<Long> implements Serializable {
     private static final long serialVersionUID = 1L;
 
     //父菜单ID，一级菜单为0
+    @NotNull(message = "上级菜单不能为空", groups = {Save.class, Update.class})
     private Long parentId;
     //父菜单名称
     private String parentName;
     //菜单名称
+    @NotBlank(message = "菜单名不能为空", groups = {Save.class, Update.class})
     private String name;
     //菜单URL
+    @NotBlank(message = "菜单URL不能为空", groups = {Save.class, Update.class})
     private String url;
     //授权(多个用逗号分隔，如：user:list,user:create)
     private String perms;
     //类型   0：目录   1：菜单   2：按钮
+    @Range(min = 0, max = 2, message = "菜单类型有误", groups = {Save.class, Update.class})
     private Integer type;
     //菜单图标
     private String icon;
