@@ -19,7 +19,10 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import io.vickze.realm.AuthRealm;
+import io.vickze.shiro.cache.RedisCacheManager;
+import io.vickze.shiro.cache.RedisSessionDAO;
+import io.vickze.shiro.realm.AuthRealm;
+import redis.clients.jedis.JedisPool;
 
 /**
  * Shiro配置
@@ -46,24 +49,30 @@ public class ShiroConfig {
     public CookieRememberMeManager rememberMeManager(SimpleCookie rememberMeCookie) {
         CookieRememberMeManager cookieRememberMeManager = new CookieRememberMeManager();
         cookieRememberMeManager.setCookie(rememberMeCookie);
-
         return cookieRememberMeManager;
     }
 
+
     @Bean("sessionManager")
-    public SessionManager sessionManager(){
+    public SessionManager sessionManager(RedisSessionDAO redisSessionDAO) {
         DefaultWebSessionManager sessionManager = new DefaultWebSessionManager();
         sessionManager.setSessionIdUrlRewritingEnabled(false);
+        //不需定时删除session，在RedisSessionDAO设置过期时间即可
+        sessionManager.setSessionValidationSchedulerEnabled(false);
+        sessionManager.setSessionDAO(redisSessionDAO);
+        //session过期时间两小时
+        sessionManager.setGlobalSessionTimeout(2 * 60 * 60 * 1000);
         return sessionManager;
     }
 
     @Bean("securityManager")
     public SecurityManager securityManager(AuthRealm authRealm, SessionManager sessionManager,
-                                           CookieRememberMeManager rememberMeManager) {
+                                           CookieRememberMeManager rememberMeManager, RedisCacheManager redisCacheManager) {
         DefaultWebSecurityManager securityManager = new DefaultWebSecurityManager();
         securityManager.setRealm(authRealm);
-        securityManager.setSessionManager(sessionManager);
+        securityManager.setCacheManager(redisCacheManager);
         securityManager.setRememberMeManager(rememberMeManager);
+        securityManager.setSessionManager(sessionManager);
 
         return securityManager;
     }

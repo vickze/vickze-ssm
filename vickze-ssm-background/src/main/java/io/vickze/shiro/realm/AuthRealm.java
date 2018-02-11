@@ -1,4 +1,4 @@
-package io.vickze.realm;
+package io.vickze.shiro.realm;
 
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;

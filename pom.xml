@@ -45,6 +45,7 @@
         <hibernate.validator.version>5.3.5.Final</hibernate.validator.version>
         <slf4j.api.version>1.7.25</slf4j.api.version>
         <io.jsonwebtoken.version>0.9.0</io.jsonwebtoken.version>
+        <kryo.version>4.0.1</kryo.version>
     </properties>
 
     <dependencies>

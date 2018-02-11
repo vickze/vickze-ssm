@@ -84,7 +84,6 @@ public class SysIndexController {
         } catch (LockedAccountException lae) {
             throw new CheckException(SysUserConstant.StatusEnum.PAUSE.getMessage());
         }
-
         return ResultDO.success();
     }
 
