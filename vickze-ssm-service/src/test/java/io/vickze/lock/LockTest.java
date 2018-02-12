@@ -11,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import redis.clients.jedis.ShardedJedisPool;
 
@@ -58,7 +59,7 @@ public class LockTest {
 
                 long startTime = System.currentTimeMillis();
                 try {
-                    if (redisLock.tryLock()) {
+                    if (redisLock.tryLock(10, TimeUnit.SECONDS)) {
                         if (stock > 0) {
                             stock--;
                             i++;
@@ -101,11 +102,11 @@ public class LockTest {
         // 多线程测试
         for (int n = 0; n < threads; n++) {
             new Thread(() -> {
-                Lock zookeeperLock = new ZookeeperLock("127.0.0.1:2181", 3000, "lock", "doc");
+                Lock zookeeperLock = new ZookeeperLock("127.0.0.1:2181", 10000, "lock", "doc");
 
                 long startTime = System.currentTimeMillis();
                 try {
-                    if (zookeeperLock.tryLock()) {
+                    if (zookeeperLock.tryLock(10, TimeUnit.SECONDS)) {
                         if (stock > 0) {
                             stock--;
                             i++;

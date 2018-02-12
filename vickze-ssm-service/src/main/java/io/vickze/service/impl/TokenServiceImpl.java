@@ -32,7 +32,7 @@ public class TokenServiceImpl implements TokenService {
     @Value("${jwt.secret}")
     private String secret;
 
-    private static final String LOCK_USER_TOKEN_NAMESPACE = "lock:user:token";
+    private static final String LOCK_USER_TOKEN_NAMESPACE = "user:token";
     private static final String LOCK_USER_TOKEN_KEY = "{0}";
 
     /**

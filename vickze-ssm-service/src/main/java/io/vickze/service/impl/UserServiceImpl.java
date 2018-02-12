@@ -7,10 +7,10 @@ import org.apache.commons.lang.RandomStringUtils;
 import org.apache.shiro.crypto.hash.Sha256Hash;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Date;
-
+import io.vickze.constant.MQConstant;
 import io.vickze.constant.UserConstant;
 import io.vickze.dao.BaseDao;
 import io.vickze.dao.UserDao;
@@ -39,6 +39,9 @@ public class UserServiceImpl extends BaseServiceImpl<Long, UserDO> implements Us
 
     @Autowired
     private TokenService tokenService;
+
+    @Autowired
+    private AmqpTemplate rabbitTemplate;
 
     @Override
     protected BaseDao<Long, UserDO> getBaseDao() {
@@ -76,7 +79,10 @@ public class UserServiceImpl extends BaseServiceImpl<Long, UserDO> implements Us
             throw new CheckException("密码错误");
         }
 
-        return tokenService.generateToken(dbUser.getId());
+        TokenDO tokenDO = tokenService.generateToken(dbUser.getId());
+        //发送用户登录消息
+        rabbitTemplate.convertAndSend(MQConstant.USER_LOGIN_QUEUE, dbUser.getId());
+        return tokenDO;
     }
 
     @Override

@@ -31,6 +31,14 @@ spring:
             max-idle: 10      # 连接池中的最大空闲连接
             min-idle: 5       # 连接池中的最小空闲连接
 
+    rabbitmq:
+        host: 127.0.0.1
+        port: 5672
+        username: guest
+        password: guest
+        publisher-confirms: true
+        virtual-host: /
+
 jwt:
     secret: Qyio111AASDXZ
 

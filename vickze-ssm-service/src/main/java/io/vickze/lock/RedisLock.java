@@ -65,7 +65,7 @@ public class RedisLock implements Lock {
     public RedisLock(ShardedJedisPool shardedJedisPool, String lockNameSpace, String lockKey) {
         this.lockId = UUID.randomUUID().toString();
         this.shardedJedisPool = shardedJedisPool;
-        this.lockNameSpace = lockNameSpace + ":";
+        this.lockNameSpace = "lock:" + lockNameSpace + ":";
         this.lockKey = lockKey;
     }
 

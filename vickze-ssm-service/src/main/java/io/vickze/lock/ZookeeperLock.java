@@ -48,7 +48,7 @@ public class ZookeeperLock implements Lock {
 
     public ZookeeperLock(String address, int timeout, String lockNamespace, String lockKey) {
         init(address, timeout, lockNamespace);
-        this.lockNamespace = "/" + lockNamespace;
+        this.lockNamespace = "/lock/" + lockNamespace;
         this.lockKey = lockKey + "_";
     }
 
