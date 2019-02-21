@@ -1,0 +1,26 @@
+#Jetty
+server:
+    port: 8001
+    jetty:
+        max-threads: 1000
+        min-threads: 30
+#    tomcat:
+#        uri-encoding: UTF-8
+#        max-threads: 1000
+#        min-spare-threads: 30
+
+spring:
+    http:
+        multipart:
+            max-file-size: 100MB
+            max-request-size: 100MB
+            enabled: true
+    # 指定静态资源的路径
+    resources:
+        static-locations: classpath:/static/
+
+dubbo:
+  address: zookeeper://127.0.0.1:2181
+  timeout: 5000
+
+

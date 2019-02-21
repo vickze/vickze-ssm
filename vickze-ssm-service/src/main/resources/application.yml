@@ -1,0 +1,18 @@
+# mysql
+spring:
+    # 环境 dev|doc|pro
+    profiles:
+        active: dev
+    datasource:
+        type: com.alibaba.druid.pool.DruidDataSource
+        driverClassName: com.mysql.jdbc.Driver
+# Mybatis配置
+mybatis:
+    mapperLocations: classpath:mapper/**/*.xml
+    configLocation: classpath:mybatis.xml
+
+# 日志配置
+logging:
+  config: classpath:logback-spring.xml
+  file: ./log/service.log
+

@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.vickze.dao.SysMenuDao">
+	<select id="get" resultType="io.vickze.entity.SysMenuDO">
+		select * from sys_menu where id = #{value}
+	</select>
+
+	<select id="list" resultType="io.vickze.entity.SysMenuDO">
+		select m.*,(select p.name from sys_menu p where p.id = m.parent_id) as parentName
+		from sys_menu m
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by m.${sidx} ${order}
+            </when>
+			<otherwise>
+                order by m.order_num asc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="count" resultType="long">
+		select count(*) from sys_menu 
+	</select>
+	 
+	<insert id="save" parameterType="io.vickze.entity.SysMenuDO" useGeneratedKeys="true" keyProperty="id">
+		insert into sys_menu
+		(
+			`parent_id`, 
+			`name`, 
+			`url`, 
+			`perms`, 
+			`type`, 
+			`icon`, 
+			`order_num`,
+			`gmt_create`,
+			`gmt_modified`
+		)
+		values
+		(
+			#{parentId}, 
+			#{name}, 
+			#{url}, 
+			#{perms}, 
+			#{type}, 
+			#{icon}, 
+			#{orderNum},
+			#{gmtCreate},
+			#{gmtModified}
+		)
+	</insert>
+
+	<insert id="saveBatch" useGeneratedKeys="true" keyProperty="id">
+		insert into sys_menu
+		(
+			`parent_id`,
+			`name`,
+			`url`,
+			`perms`,
+			`type`,
+			`icon`,
+			`order_num`,
+			`gmt_create`,
+			`gmt_modified`
+		)
+		values()
+		<foreach item="item" collection="list" separator="," >
+		(
+			#{item.parentId},
+			#{item.name},
+			#{item.url},
+			#{item.perms},
+			#{item.type},
+			#{item.icon},
+			#{item.orderNum},
+			#{item.gmtCreate},
+			#{item.gmtModified}
+		)
+		</foreach>
+	</insert>
+
+	<update id="update" parameterType="io.vickze.entity.SysMenuDO">
+		update sys_menu 
+		<set>
+			<if test="parentId != null">`parent_id` = #{parentId}, </if>
+			<if test="name != null">`name` = #{name}, </if>
+			<if test="url != null">`url` = #{url}, </if>
+			<if test="perms != null">`perms` = #{perms}, </if>
+			<if test="type != null">`type` = #{type}, </if>
+			<if test="icon != null">`icon` = #{icon}, </if>
+			<if test="orderNum != null">`order_num` = #{orderNum}, </if>
+			`gmt_modified` = #{gmtModified}
+		</set>
+		where id = #{id}
+	</update>
+
+	<update id="updateBatch">
+		update sys_menu
+		<trim prefix="set" suffixOverrides=",">
+			<trim prefix="`parent_id` = case" suffix="end,">
+				<foreach collection="list" item="item">
+					<if test="item.parentId != null">
+						when id = #{item.id} then #{item.parentId}
+					</if>
+				</foreach>
+			</trim>
+			<trim prefix="`name` = case" suffix="end,">
+				<foreach collection="list" item="item">
+					<if test="item.name != null">
+						when id = #{item.id} then #{item.name}
+					</if>
+				</foreach>
+			</trim>
+			<trim prefix="`url` = case" suffix="end,">
+				<foreach collection="list" item="item">
+					<if test="item.url != null">
+						when id = #{item.id} then #{item.url}
+					</if>
+				</foreach>
+			</trim>
+			<trim prefix="`perms` = case" suffix="end,">
+				<foreach collection="list" item="perms">
+					<if test="item.perms != null">
+						when id = #{item.id} then #{item.perms}
+					</if>
+				</foreach>
+			</trim>
+			<trim prefix="`type` = case" suffix="end,">
+				<foreach collection="list" item="item">
+					<if test="item.type != null">
+						when id = #{item.id} then #{item.type}
+					</if>
+				</foreach>
+			</trim>
+			<trim prefix="`icon` = case" suffix="end,">
+				<foreach collection="list" item="item">
+					<if test="item.icon != null">
+						when id = #{item.id} then #{item.icon}
+					</if>
+				</foreach>
+			</trim>
+			<trim prefix="`order_num` = case" suffix="end,">
+				<foreach collection="list" item="item">
+					<if test="item.orderNum != null">
+						when id = #{item.id} then #{item.orderNum}
+					</if>
+				</foreach>
+			</trim>
+			<trim prefix="`gmt_modified` = case" suffix="end,">
+				<foreach collection="list" item="item">
+					when id = #{item.id} then #{item.gmtModified}
+				</foreach>
+			</trim>
+		</trim>
+		where id in
+		<foreach item="item" collection="list" open="(" separator="," close=")">
+			#{item.id}
+		</foreach>
+	</update>
+
+	<delete id="delete">
+		delete from sys_menu where id = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from sys_menu where id in
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+
+	<select id="listByParentId" resultType="io.vickze.entity.SysMenuDO">
+		select * from sys_menu where parent_id = #{parentId} order by order_num asc
+	</select>
+
+	<select id="listNotButton" resultType="io.vickze.entity.SysMenuDO">
+		select * from sys_menu where type != 2 order by order_num asc
+	</select>
+</mapper>

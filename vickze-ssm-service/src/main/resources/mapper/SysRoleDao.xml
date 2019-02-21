@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.vickze.dao.SysRoleDao">
+
+	<select id="get" resultType="io.vickze.entity.SysRoleDO">
+		select * from sys_role where id = #{value}
+	</select>
+
+	<select id="list" resultType="io.vickze.entity.SysRoleDO">
+		select * from sys_role
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by id desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="count" resultType="long">
+		select count(*) from sys_role 
+	</select>
+	 
+	<insert id="save" parameterType="io.vickze.entity.SysRoleDO" useGeneratedKeys="true" keyProperty="id">
+		insert into sys_role
+		(
+			`role_name`, 
+			`remark`, 
+			`gmt_create`,
+			`gmt_modified`
+		)
+		values
+		(
+			#{roleName}, 
+			#{remark},
+			#{gmtCreate},
+			#{gmtModified}
+		)
+	</insert>
+
+	<insert id="saveBatch" useGeneratedKeys="true" keyProperty="id">
+		insert into sys_role
+		(
+			`role_name`,
+			`remark`,
+			`gmt_create`,
+			`gmt_modified`
+		)
+		values
+		<foreach item="item" collection="list" separator="," >
+		(
+			#{item.roleName},
+			#{item.remark},
+			#{item.gmtCreate},
+			#{item.gmtModified}
+		)
+		</foreach>
+	</insert>
+	 
+	<update id="update" parameterType="io.vickze.entity.SysRoleDO">
+		update sys_role 
+		<set>
+			<if test="roleName != null">`role_name` = #{roleName}, </if>
+			<if test="remark != null">`remark` = #{remark}, </if>
+			`gmt_modified` = #{gmtModified}
+		</set>
+		where id = #{id}
+	</update>
+
+	<update id="updateBatch">
+		update sys_role
+		<trim prefix="set" suffixOverrides=",">
+			<trim prefix="`role_name` = case" suffix="end,">
+				<foreach collection="list" item="item">
+					<if test="item.roleName != null">
+						when id = #{item.id} then #{item.roleName}
+					</if>
+				</foreach>
+			</trim>
+			<trim prefix="`remark` = case" suffix="end,">
+				<foreach collection="list" item="item">
+					<if test="item.remark != null">
+						when id = #{item.id} then #{item.remark}
+					</if>
+				</foreach>
+			</trim>
+			<trim prefix="`gmt_modified` = case" suffix="end,">
+				<foreach collection="list" item="item">
+					when id = #{item.id} then #{item.gmtModified}
+				</foreach>
+			</trim>
+		</trim>
+		where id in
+		<foreach item="item" collection="list" open="(" separator="," close=")">
+			#{item.id}
+		</foreach>
+	</update>
+
+	<delete id="delete">
+		delete from sys_role where id = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from sys_role where id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+</mapper>

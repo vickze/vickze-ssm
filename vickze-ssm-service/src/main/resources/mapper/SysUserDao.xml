@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.vickze.dao.SysUserDao">
+
+	<select id="get" resultType="io.vickze.entity.SysUserDO">
+		select * from sys_user where id = #{value}
+	</select>
+
+	<select id="list" resultType="io.vickze.entity.SysUserDO">
+		select * from sys_user
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by id desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="count" resultType="long">
+		select count(*) from sys_user 
+	</select>
+	 
+	<insert id="save" parameterType="io.vickze.entity.SysUserDO" useGeneratedKeys="true" keyProperty="id">
+		insert into sys_user
+		(
+			`username`, 
+			`password`, 
+			`salt`, 
+			`email`, 
+			`mobile`, 
+			`status`,
+			`gmt_create`,
+			`gmt_modified`
+		)
+		values
+		(
+			#{username}, 
+			#{password}, 
+			#{salt}, 
+			#{email}, 
+			#{mobile}, 
+			#{status},
+			#{gmtCreate},
+			#{gmtModified}
+		)
+	</insert>
+
+	<insert id="saveBatch" useGeneratedKeys="true" keyProperty="id">
+		insert into sys_user
+		(
+			`username`,
+			`password`,
+			`salt`,
+			`email`,
+			`mobile`,
+			`status`,
+			`gmt_create`,
+			`gmt_modified`
+		)
+		values
+		<foreach item="item" collection="list" separator="," >
+		(
+			#{item.username},
+			#{item.password},
+			#{item.salt},
+			#{item.email},
+			#{item.mobile},
+			#{item.status},
+			#{item.gmtCreate},
+			#{item.gmtModified}
+		)
+		</foreach>
+	</insert>
+	 
+	<update id="update" parameterType="io.vickze.entity.SysUserDO">
+		update sys_user 
+		<set>
+			<if test="username != null">`username` = #{username}, </if>
+			<if test="email != null">`email` = #{email}, </if>
+			<if test="mobile != null">`mobile` = #{mobile}, </if>
+			<if test="status != null">`status` = #{status}, </if>
+			`gmt_modified` = #{gmtModified}
+		</set>
+		where id = #{id}
+	</update>
+
+	<update id="updateBatch">
+		update sys_user
+		<trim prefix="set" suffixOverrides=",">
+			<trim prefix="`username` = case" suffix="end,">
+				<foreach collection="list" item="item">
+					<if test="item.username != null">
+						when id = #{item.id} then #{item.username}
+					</if>
+				</foreach>
+			</trim>
+			<trim prefix="`email` = case" suffix="end,">
+				<foreach collection="list" item="item">
+					<if test="item.email != null">
+						when id = #{item.id} then #{item.email}
+					</if>
+				</foreach>
+			</trim>
+			<trim prefix="`mobile` = case" suffix="end,">
+				<foreach collection="list" item="item">
+					<if test="item.mobile != null">
+						when id = #{item.id} then #{item.mobile}
+					</if>
+				</foreach>
+			</trim>
+			<trim prefix="`status` = case" suffix="end,">
+				<foreach collection="list" item="item">
+					<if test="item.status != null">
+						when id = #{item.id} then #{item.status}
+					</if>
+				</foreach>
+			</trim>
+			<trim prefix="`gmt_modified` = case" suffix="end,">
+				<foreach collection="list" item="item">
+					when id = #{item.id} then #{item.gmtModified}
+				</foreach>
+			</trim>
+		</trim>
+		where id in
+		<foreach item="item" collection="list" open="(" separator="," close=")">
+			#{item.id}
+		</foreach>
+
+
+		<!--
+		批量更新，效率较上面高，但无法返回正确的更新行数，上面的效率较低，特别是在更新大批量的情况下，在更新大批量的情况下应考虑分批更新
+		<foreach collection="list" item="item" separator=";">
+		update sys_user
+		<set>
+			<if test="item.username != null">`username` = #{item.username}, </if>
+			<if test="item.email != null">`email` = #{item.email}, </if>
+			<if test="item.mobile != null">`mobile` = #{item.mobile}, </if>
+			<if test="item.status != null">`status` = #{item.status}, </if>
+			`gmt_modified` = #{item.gmtModified}
+		</set>
+		where id = #{item.id}
+		</foreach>
+		-->
+	</update>
+	
+	<delete id="delete">
+		delete from sys_user where id = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from sys_user where id in
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+	<select id="getByUsername" resultType="io.vickze.entity.SysUserDO">
+		select * from sys_user where username = #{username}
+	</select>
+
+	<!-- 查询用户的所有菜单ID -->
+	<select id="listAllMenuId" resultType="long">
+		select distinct rm.menu_id from sys_user_role ur
+		LEFT JOIN sys_role_menu rm on ur.role_id = rm.role_id
+		where ur.user_id = #{id}
+	</select>
+
+	<!-- 查询用户的所有权限 -->
+	<select id="listAllPerms" resultType="string">
+		select m.perms from sys_user_role ur
+		LEFT JOIN sys_role_menu rm on ur.role_id = rm.role_id
+		LEFT JOIN sys_menu m on rm.menu_id = m.id
+		where ur.user_id = #{id}
+	</select>
+
+	<update id="updatePassword" parameterType="map">
+		update sys_user set `password` = #{newPassword}, `gmt_modified` = #{gmtModified}
+		where id = #{userId} and password = #{password}
+	</update>
+</mapper>

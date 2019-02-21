@@ -1,0 +1,30 @@
+# Tomcat
+server:
+    tomcat:
+        uri-encoding: UTF-8
+        max-threads: 1000
+        min-spare-threads: 30
+    port: 80
+
+spring:
+    http:
+        multipart:
+            max-file-size: 100MB
+            max-request-size: 100MB
+            enabled: true
+
+    mvc:
+      throw-exception-if-no-handler-found: true
+
+    # 指定静态资源的路径
+    resources:
+        add-mappings: false
+
+    dubbo:
+        application:
+            name: vickze-ssm-api
+        registry:
+            address: zookeeper://192.168.244.131:2181
+        scan: io.vickze
+
+

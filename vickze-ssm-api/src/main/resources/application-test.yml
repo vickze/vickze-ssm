@@ -1,0 +1,26 @@
+# Tomcat
+server:
+    tomcat:
+        uri-encoding: UTF-8
+        max-threads: 1000
+        min-spare-threads: 30
+    port: 8080
+
+spring:
+    http:
+        multipart:
+            max-file-size: 100MB
+            max-request-size: 100MB
+            enabled: true
+    # 指定静态资源的路径
+    resources:
+        static-locations: classpath:/swagger/
+
+    dubbo:
+        application:
+            name: vickze-ssm-api
+        registry:
+            address: zookeeper://192.168.244.131:2181
+        scan: io.vickze
+
+
